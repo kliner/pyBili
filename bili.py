@@ -19,17 +19,17 @@ BUFFER_SIZE = 128 * 1024
 
 DEBUG = 0
 
-class Danmuku(object):
-    def __init__(self, action, rawDanmuku, time):
+class Danmaku(object):
+    def __init__(self, action, rawData, time):
         self.action = action
-        self.rawDanmuku = rawDanmuku
+        self.rawData = rawData
         self.time = time
 
-class DanmukuHandler(object):
-    def handleDanmuku(self, danmuku):
+class DanmakuHandler(object):
+    def handleDanmaku(self, danmaku):
         pass
 
-class DefaultDanmukuHandler(DanmukuHandler):
+class DefaultDanmakuHandler(DanmakuHandler):
     def __init__(self, startGiftResponse = False):
         self.cnt = 9
         self.date_format = '%H:%M:%S'
@@ -38,19 +38,19 @@ class DefaultDanmukuHandler(DanmukuHandler):
         self.giftResponseThreadAlive = False
         if startGiftResponse: self.startGiftResponseThread()
 
-    def handleDanmuku(self, danmuku):
-        body = danmuku.rawDanmuku
-        if danmuku.action == 3: # online clients
+    def handleDanmaku(self, danmaku):
+        body = danmaku.rawData
+        if danmaku.action == 3: # online clients
             onlineNum = struct.unpack('>i', body)[0]
             self.cnt += 1
             if self.cnt >= 10: 
                 print '在线灵魂数:' + str(onlineNum)
                 self.cnt = 0
-        elif danmuku.action == 5: # danmuku packet
+        elif danmaku.action == 5: # danmaku packet
             raw = json.loads(body)
             if DEBUG: print raw
 
-            tm = time.strftime(self.date_format, danmuku.time)
+            tm = time.strftime(self.date_format, danmaku.time)
             if 'info' in raw:
                 info = raw['info']
                 print '[%s] \033[91m%s\033[0m : \033[94m%s\033[0m' % (tm, info[2][1].encode('utf-8'), info[1].encode('utf-8'))
@@ -76,7 +76,7 @@ class DefaultDanmukuHandler(DanmukuHandler):
                     if t_uname != uname: uname = '大家'
                     if t_giftName != giftName: giftName = '礼物'
                 #print '谢谢%s送的%s个%s' % (uname, str(num), giftName)
-                bili_sender.sendDanmuku(self.roomid, '谢谢%s送的%s个%s' % (uname, str(num), giftName))
+                bili_sender.sendDanmaku(self.roomid, '谢谢%s送的%s个%s' % (uname, str(num), giftName))
                 while self.gifts: self.gifts.pop()
             self.LOCK.release()
             time.sleep(2)
@@ -85,17 +85,18 @@ class DefaultDanmukuHandler(DanmukuHandler):
         if not self.giftResponseThreadAlive:
             thread.start_new_thread(self.giftResponseThread, ())
             self.giftResponseThreadAlive = True
+            bili_sender.init()
             if DEBUG: print 'giftResponseThreadStarted!'
 
 class BiliHelper(object):
 
-    def __init__(self, roomid = 90012, packetHandler = DefaultDanmukuHandler()):
+    def __init__(self, roomid = 90012, packetHandler = DefaultDanmakuHandler()):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.connect((HOST, PORT))
         self.cnt = 9
         self.roomid = roomid
         self.heartBeatThreadAlive, self.packetReceiveThreadAlive, self.giftResponseThreadAlive = 0, 0, 0
-        self.danmukuHandler = packetHandler
+        self.danmakuHandler = packetHandler
         self.joinChannel(roomid)
         self.startHeartBeatThread()
         self.startPacketReceiveThread()
@@ -136,9 +137,9 @@ class BiliHelper(object):
                 packetLength = int(header[0])
                 body = packet[16:packetLength]
                 action = header[3]
-                danmuku = Danmuku(action, body, time.localtime(time.time()))
+                danmaku = Danmaku(action, body, time.localtime(time.time()))
 
-                self.danmukuHandler.handleDanmuku(danmuku)
+                self.danmakuHandler.handleDanmaku(danmaku)
 
                 if packetLength > len(packet):
                     print 'packetLengthError!', packetLength, len(packet), repr(packet[:packetLength]), repr(packet[packetLength:])
@@ -154,6 +155,7 @@ class BiliHelper(object):
             if packet: self.parsePacket(packet)
 
 if __name__ == '__main__':
-    py = BiliHelper(90012, DefaultDanmukuHandler(startGiftResponse = True))
+    #py = BiliHelper(26057)
+    py = BiliHelper(90012, DefaultDanmakuHandler(startGiftResponse = True))
     while 1:
         cmd = raw_input()

@@ -5,13 +5,18 @@ import time
 
 SEND_URL = 'http://live.bilibili.com/msg/send'
 
-f = open(r'cookie.txt','r')
 cookies = {}
-for line in f.read().split(';'):
-    name, value = line.strip().split('=', 1)
-    cookies[name] = value
 
-def sendDanmuku(roomid, content):
+def init():
+    with open(r'cookie.txt','r') as f:
+        try:
+            for line in f.read().split(';'):
+                name, value = line.strip().split('=', 1)
+                cookies[name] = value
+        except Exception, e:
+            print 'warning! please set correct cookies into \'cookie.txt\''
+
+def sendDanmaku(roomid, content):
     content = content.strip()
     if not content: return
     params = {

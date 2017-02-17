@@ -4,7 +4,7 @@ This is a python live.bilibili.com helper library.
 
 # Function
 
-* Danmuku receive / sender
+* Danmaku receive / sender
 * Gift auto response
 * Easy to add new functions.
 
