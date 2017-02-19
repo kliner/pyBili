@@ -28,9 +28,10 @@ def sendDanmaku(roomid, content):
         "roomid":roomid
         }
     r = requests.post(SEND_URL, data=params, cookies=cookies)
-    #print r.status_code, r.content
+    result = r.content
 
 if __name__ == '__main__':
+    init()
     while 1:
         content = raw_input()
-        sendDanmuku(90012, content)
+        sendDanmaku(90012, content)
