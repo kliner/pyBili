@@ -1,1 +1,1 @@
-copy cookies of live.bilibili.com into this file.
+copy cookies of live.bilibili.com = into this file.
