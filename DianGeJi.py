@@ -10,6 +10,8 @@ import json
 reload(sys)  
 sys.setdefaultencoding('utf8')
 
+DEBUG = 1
+
 class DanmakuHandler(bili.DanmakuHandler):
     
     block_lst = ['圆舞曲', '肖邦', '钟']
@@ -30,17 +32,19 @@ class DanmakuHandler(bili.DanmakuHandler):
         print '初始化完成'
 
     def saveConfig(self):
+        print '保存数据...'
         with open('config.json', 'w') as f:
             self.block_lst = list(set(self.block_lst))
             f.write(json.dumps(self.block_lst) + '\n')
             f.write(json.dumps(self.to_play_lst) + '\n')
             f.write(json.dumps(self.pending_lst) + '\n')
+        print '保存数据完成'
 
     def clear(self): 
         print("\033c")
 
     def output_help(self):
-        print('操作指南: f-收藏,b-屏蔽,c-已弹奏,d-删除,s-显示详细列表,q-退出')
+        print('操作指南: f-收藏,b-屏蔽,c-已弹奏,d-删除,df-删除收藏,s-显示详细列表,q-退出')
 
     def output_all(self):
         self.clear()
@@ -79,33 +83,55 @@ class DanmakuHandler(bili.DanmakuHandler):
                 self.to_play_lst += [content]
                 self.output()
 
+    def getIdx(self, s, offset):
+        try:
+            idx = s[offset:]
+            if not idx: idx = 0
+            else: idx = int(idx) - 1
+            return idx
+        except Exception, e:
+            if DEBUG: print 'error!', e
+            return 0
+
     def parseCommand(self, s):
-        s = s.strip()
-        idx = s[1:]
-        if not idx: idx = 0
-        else: idx = int(idx) - 1
-        if idx < len(self.to_play_lst):
+        try:
+            s = s.strip()
             if s == 's': 
                 pass
+            elif s[:2] == 'df':
+                idx = self.getIdx(s, 2)
+                if idx < len(self.pending_lst):
+                    self.pending_lst.pop(idx)
             elif s[0] == 'd': 
-                self.to_play_lst.pop(idx)
+                idx = self.getIdx(s, 1)
+                if idx < len(self.to_play_lst):
+                    self.to_play_lst.pop(idx)
             elif s[0] == 'b': 
-                content = self.to_play_lst[idx] 
-                self.block_lst += [content]
-                self.to_play_lst.pop(idx)
+                idx = self.getIdx(s, 1)
+                if idx < len(self.to_play_lst):
+                    content = self.to_play_lst[idx] 
+                    self.block_lst += [content]
+                    self.to_play_lst.pop(idx)
             elif s[0] == 'f':
-                content = self.to_play_lst[idx] 
-                self.pending_lst += [content]
-                self.to_play_lst.pop(idx)
+                idx = self.getIdx(s, 1)
+                if idx < len(self.to_play_lst):
+                    content = self.to_play_lst[idx] 
+                    self.pending_lst += [content]
+                    self.to_play_lst.pop(idx)
             elif s[0] == 'c':
-                content = self.to_play_lst[idx] 
-                self.completed[content] = self.completed.get(content, 0) + 1
-                self.to_play_lst.pop(idx)
+                idx = self.getIdx(s, 1)
+                if idx < len(self.to_play_lst):
+                    content = self.to_play_lst[idx] 
+                    self.completed[content] = self.completed.get(content, 0) + 1
+                    self.to_play_lst.pop(idx)
             elif s[0] == 'q':
                 self.saveConfig()
                 self.output_all()
                 sys.exit(0)
-        self.output_all()
+                return
+            self.output_all()
+        except Exception, e:
+            if DEBUG: print 'error!', e
 
 if __name__ == '__main__':
     argv = sys.argv
@@ -118,5 +144,5 @@ if __name__ == '__main__':
     while 1:
         cmd = raw_input()
         if cmd == '': danmakuHandler.output_all()
-        elif cmd[0] in 'sbdfcq': danmakuHandler.parseCommand(cmd)
+        elif cmd[0] in 'sbdfrcq': danmakuHandler.parseCommand(cmd)
         else: danmakuHandler.handleDanmaku(cmd)

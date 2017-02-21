@@ -91,7 +91,8 @@ class BiliHelper(object):
                         print 'packetLengthError!', packetLength, len(packet), repr(packet[:packetLength]), repr(packet[packetLength:])
                     break
                 packet = packet[packetLength:]
-
+        except SystemExit:  
+            return  
         except Exception, e:
             print 'decode error!', e
 
