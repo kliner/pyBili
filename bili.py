@@ -45,7 +45,7 @@ class BiliHelper(object):
         self.joinChannel(roomid)
         self.startHeartBeatThread()
         self.startPacketReceiveThread()
-        time.sleep(30)
+        time.sleep(5) # sleep 5s for thread start
         thread.start_new_thread(self.localCheckThread, ())
 
     def startHeartBeatThread(self):
