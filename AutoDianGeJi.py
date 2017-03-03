@@ -39,7 +39,7 @@ class DanmakuHandler(bili.DanmakuHandler):
             print '正在播放: ', self.p.filename[:-4]
 
     def printHelp(self):
-        print('发 \'点歌\' 进入 点歌模式，在点歌模式下发 \'搜索 关键字\' 搜索列表，在点歌模式下发送 \'点歌 ID\' 完成点歌。请在五分钟内完成全部操作哦～')
+        print('发 \'点歌\' 进入 点歌模式，在点歌模式下发 \'搜索 关键字\' 搜索列表，在点歌模式下发送 \'点歌 ID\' 完成点歌。发送 \'退出\' 结束点歌。请在五分钟内完成全部操作哦～')
 
     def printToPlay(self):
         print '当前待播放列表：'
@@ -112,6 +112,7 @@ class DanmakuHandler(bili.DanmakuHandler):
                     print '搜索 %s 的结果列表：' % key 
                     for i, t in enumerate(self.all_music):
                         if key in t.lower(): print '%d\t: %s' % (i+1, t) 
+                    print '切歌时候会导致搜索结果丢失，请注意重新搜索哦' % key 
                 elif user == self.cur_user and content[:6] in ['点歌', '點歌']: 
                     try:
                         i = int(content[6:].strip())
