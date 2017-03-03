@@ -26,6 +26,7 @@ class DanmakuHandler(bili.DanmakuHandler):
     LOCK = threading.Lock()
     cur_user = None
     state = 'play'
+    timer = None
 
     def __init__(self):
         self.loadMusic()
@@ -81,7 +82,6 @@ class DanmakuHandler(bili.DanmakuHandler):
                 self.printToPlay()
 
     def localTimerThread(self, user):
-        time.sleep(300)
         if self.cur_user == user: 
             self.cur_user = None
             self.clear()
@@ -100,7 +100,8 @@ class DanmakuHandler(bili.DanmakuHandler):
                         self.cur_user = user
                         self.printHelp()
                         print '当前操作者：' + user
-                        thread.start_new_thread(self.localTimerThread, (user, ))
+                        self.timer = threading.Timer(300, self.localTimerThread, (user, ))
+                        self.timer.start()
                         bili_sender.sendDanmaku(roomid, '%s开始点歌～' % self.cur_user)
                     else:
                         bili_sender.sendDanmaku(roomid, '%s正在点歌, 请等一下哦' % self.cur_user)
@@ -119,7 +120,6 @@ class DanmakuHandler(bili.DanmakuHandler):
                         self.LOCK.acquire()
                         if len(self.to_play_lst) < 10:
                             self.to_play_lst += [(user, music)]
-                        self.cur_user = None
                         self.LOCK.release()
                         self.clear()
                         self.printToPlay()
@@ -129,9 +129,9 @@ class DanmakuHandler(bili.DanmakuHandler):
                 elif content.lower() in ['退出', 'exit']: 
                     bili_sender.sendDanmaku(roomid, '欢迎再来点歌哦～')
                     self.cur_user = None
+                    if self.timer: self.timer.cancel()
                     self.clear()
                     self.printToPlay()
-                    
                         
 if __name__ == '__main__':
     argv = sys.argv
