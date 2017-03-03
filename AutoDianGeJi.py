@@ -61,7 +61,7 @@ class DanmakuHandler(bili.DanmakuHandler):
         if self.cur_user: print '当前操作者：', self.cur_user
         self.printToPlay()
 
-        self.p.volume = 5
+        self.p.volume = 8
         length = self.p.length
         self.p.pause()
         time.sleep(length)
@@ -101,15 +101,16 @@ class DanmakuHandler(bili.DanmakuHandler):
                         self.printHelp()
                         print '当前操作者：' + user
                         thread.start_new_thread(self.localTimerThread, (user, ))
-
+                        bili_sender.sendDanmaku(roomid, '%s开始点歌～' % self.cur_user)
                     else:
                         bili_sender.sendDanmaku(roomid, '%s正在点歌, 请等一下哦' % self.cur_user)
                 elif user == self.cur_user and content[:6] in ['搜索']:
                     self.clear()
-                    key = content[6:].strip()
+                    key = content[6:].strip().lower()
+                    bili_sender.sendDanmaku(roomid, '搜索 %s 中...' % key)
                     print '搜索 %s 的结果列表：' % key 
                     for i, t in enumerate(self.all_music):
-                        if key in t: print '%d\t: %s' % (i+1, t) 
+                        if key in t.lower(): print '%d\t: %s' % (i+1, t) 
                 elif user == self.cur_user and content[:6] in ['点歌', '點歌']: 
                     try:
                         i = int(content[6:].strip())
@@ -125,6 +126,11 @@ class DanmakuHandler(bili.DanmakuHandler):
                     except Exception, e:
                         if DEBUG: print e
                         bili_sender.sendDanmaku(roomid, '请输入正确的点歌指令哦')
+                elif content.lower() in ['退出', 'exit']: 
+                    bili_sender.sendDanmaku(roomid, '欢迎再来点歌哦～')
+                    self.cur_user = None
+                    self.clear()
+                    self.printToPlay()
                     
                         
 if __name__ == '__main__':
