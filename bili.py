@@ -45,6 +45,8 @@ class BiliHelper(object):
         self.joinChannel(roomid)
         self.startHeartBeatThread()
         self.startPacketReceiveThread()
+        time.sleep(30)
+        thread.start_new_thread(self.localCheckThread, ())
 
     def startHeartBeatThread(self):
         if not self.heartBeatThreadAlive:
@@ -69,10 +71,24 @@ class BiliHelper(object):
         self.sendPacket(7, body)
         return 1
 
-    def heartBeatThread(self):
+    def localCheckThread(self):
         while 1:
-            self.sendPacket(2, '')
-            time.sleep(30)
+            if not self.heartBeatThreadAlive:
+                print 'detect heartBeatThread down, restarting...'
+                thread.start_new_thread(self.heartBeatThread, ())
+            if not self.packetReceiveThreadAlive:
+                print 'detect packetReceiveThread down, restarting...'
+                thread.start_new_thread(self.recvThread, ())
+            time.sleep(60)
+
+    def heartBeatThread(self):
+        try:
+            while 1:
+                self.sendPacket(2, '')
+                time.sleep(30)
+        except Exception, e:
+            print 'heartBeatThread down!'
+            self.heartBeatThreadAlive = False
 
     def parsePacket(self, packet):
         try:
@@ -97,9 +113,13 @@ class BiliHelper(object):
             print 'decode error!', e
 
     def recvThread(self):
-        while 1:
-            packet = self.s.recv(BUFFER_SIZE)
-            if packet: self.parsePacket(packet)
+        try:
+            while 1:
+                packet = self.s.recv(BUFFER_SIZE)
+                if packet: self.parsePacket(packet)
+        except Exception, e:
+            print 'recvThread down!'
+            self.packetReceiveThreadAlive = False
 
 if __name__ == '__main__':
     while 1:
