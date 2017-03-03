@@ -25,9 +25,11 @@ class DanmakuHandler(bili.DanmakuHandler):
     p = mplayer.Player()
     LOCK = threading.Lock()
     cur_user = None
+    state = 'play'
 
     def __init__(self):
         self.loadMusic()
+        bili_sender.init(()
         thread.start_new_thread(self.musicThread, ())
 
     def clear(self): 
@@ -47,16 +49,22 @@ class DanmakuHandler(bili.DanmakuHandler):
         if DEBUG: print self.all_music[0], len(self.all_music)
         
     def playMusic(self, name):
+        if DEBUG: 
+            print 'player state:', self.p.is_alive()
+            print 'self state:', self.state
+        while self.state != 'play': time.sleep(1)
+        self.p.stop()
         self.p.loadfile(self.lib_path + name + '.mp3')
         if DEBUG: print 'playing ', self.p.filename
-        if not self.cur_user: 
-            self.clear()
-            self.printToPlay()
+        self.clear()
+        if self.cur_user: print '当前操作者：', self.cur_user
+        self.printToPlay()
 
         self.p.volume = 5
         length = self.p.length
         self.p.pause()
         time.sleep(length)
+        if DEBUG: print 'finish play ', name, self.p.filename
 
     def musicThread(self):
         while 1:
@@ -75,6 +83,7 @@ class DanmakuHandler(bili.DanmakuHandler):
         time.sleep(300)
         if self.cur_user == user: 
             self.cur_user = None
+            self.clear()
             self.printToPlay()
 
     def handleDanmaku(self, danmaku):
@@ -103,14 +112,17 @@ class DanmakuHandler(bili.DanmakuHandler):
                 elif user == self.cur_user and content[:6] in ['点歌', '點歌']: 
                     try:
                         i = int(content[6:].strip())
-                        m = self.all_music[i-1]
+                        music = self.all_music[i-1]
+                        if DEBUG: print user, i, music
                         self.LOCK.acquire()
-                        self.to_play_lst += [(user, m)]
+                        if len(self.to_play_lst) < 10:
+                            self.to_play_lst += [(user, music)]
                         self.cur_user = None
                         self.LOCK.release()
                         self.clear()
                         self.printToPlay()
                     except Exception, e:
+                        if DEBUG: print e
                         bili_sender.sendDanmaku(roomid, '请输入正确的点歌指令哦')
                     
                         
@@ -123,4 +135,13 @@ if __name__ == '__main__':
     danmakuHandler = DanmakuHandler()
     py = bili.BiliHelper(roomid, danmakuHandler)
     while 1:
-        cmd = raw_input()
+        cmd = raw_input().strip()
+        if cmd == 'p':
+            danmakuHandler.p.pause()
+            if danmakuHandler.state == 'pause': 
+                danmakuHandler.state = 'play'
+                print 'play'
+            elif danmakuHandler.state == 'play': 
+                danmakuHandler.state = 'pause'
+                print 'pause'
+
