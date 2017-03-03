@@ -45,7 +45,7 @@ class DanmakuHandler(bili.DanmakuHandler):
         for u, m in self.to_play_lst: print '%s 点了\t: %s' % (u, m) 
 
     def loadMusic(self):
-        self.all_music += [f[:-4] for f in os.listdir(self.lib_path) if f[-4:] == '.mp3']
+        self.all_music = [f[:-4] for f in os.listdir(self.lib_path) if f[-4:] == '.mp3']
         if DEBUG: print self.all_music[0], len(self.all_music)
         
     def playMusic(self, name):
@@ -145,4 +145,6 @@ if __name__ == '__main__':
             elif danmakuHandler.state == 'play': 
                 danmakuHandler.state = 'pause'
                 print 'pause'
+        elif cmd == 'r':
+            danmakuHandler.loadMusic()
 
