@@ -29,7 +29,7 @@ class DanmakuHandler(bili.DanmakuHandler):
 
     def __init__(self):
         self.loadMusic()
-        bili_sender.init(()
+        bili_sender.init()
         thread.start_new_thread(self.musicThread, ())
 
     def clear(self): 
@@ -55,6 +55,7 @@ class DanmakuHandler(bili.DanmakuHandler):
         while self.state != 'play': time.sleep(1)
         self.p.stop()
         self.p.loadfile(self.lib_path + name + '.mp3')
+        time.sleep(0.5)
         if DEBUG: print 'playing ', self.p.filename
         self.clear()
         if self.cur_user: print '当前操作者：', self.cur_user
