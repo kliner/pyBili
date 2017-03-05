@@ -108,11 +108,11 @@ class DanmakuHandler(bili.DanmakuHandler):
                 elif user == self.cur_user and content[:6] in ['搜索']:
                     self.clear()
                     key = content[6:].strip().lower()
-                    bili_sender.sendDanmaku(roomid, '搜索 %s 中...' % key)
+                    if user != 'klikli': bili_sender.sendDanmaku(roomid, '搜索 %s 中...' % key)
                     print '搜索 %s 的结果列表：' % key 
                     for i, t in enumerate(self.all_music):
                         if key in t.lower(): print '%d\t: %s' % (i+1, t) 
-                    print '切歌时候会导致搜索结果丢失，请注意重新搜索哦' % key 
+                    print '切歌时候会导致搜索结果丢失，请注意重新搜索哦'
                 elif user == self.cur_user and content[:6] in ['点歌', '點歌']: 
                     try:
                         i = int(content[6:].strip())
@@ -124,6 +124,7 @@ class DanmakuHandler(bili.DanmakuHandler):
                         self.LOCK.release()
                         self.clear()
                         self.printToPlay()
+                        bili_sender.sendDanmaku(roomid, '[%s]点歌成功' % music[:9])
                     except Exception, e:
                         if DEBUG: print e
                         bili_sender.sendDanmaku(roomid, '请输入正确的点歌指令哦')
