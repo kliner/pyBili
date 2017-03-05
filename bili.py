@@ -75,10 +75,10 @@ class BiliHelper(object):
         while 1:
             if not self.heartBeatThreadAlive:
                 print 'detect heartBeatThread down, restarting...'
-                thread.start_new_thread(self.heartBeatThread, ())
+                self.startHeartBeatThread()
             if not self.packetReceiveThreadAlive:
                 print 'detect packetReceiveThread down, restarting...'
-                thread.start_new_thread(self.recvThread, ())
+                self.startPacketReceiveThread()
             time.sleep(60)
 
     def heartBeatThread(self):
