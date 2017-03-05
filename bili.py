@@ -42,13 +42,13 @@ class BiliHelper(object):
         self.heartBeatThreadAlive, self.packetReceiveThreadAlive, self.giftResponseThreadAlive = 0, 0, 0
         self.danmakuHandler = packetHandler
         packetHandler.setRoomId(roomid)
-        self.joinChannel(roomid)
         self.startHeartBeatThread()
         self.startPacketReceiveThread()
         time.sleep(5) # sleep 5s for thread start
         thread.start_new_thread(self.localCheckThread, ())
 
     def startHeartBeatThread(self):
+        self.joinChannel(self.roomid)
         if not self.heartBeatThreadAlive:
             thread.start_new_thread(self.heartBeatThread, ())
             self.heartBeatThreadAlive = True
