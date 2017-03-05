@@ -12,12 +12,13 @@ import sys
 DEBUG = 0
 
 class DanmakuHandler(bili.DanmakuHandler):
-    def __init__(self, startGiftResponse = False):
+    def __init__(self, startGiftResponse = False, showTime = True):
         self.cnt = 9
         self.date_format = '%H:%M:%S'
         self.gifts = []
         self.LOCK = threading.Lock()
         self.giftResponseThreadAlive = False
+        self.showTime = showTime
         if startGiftResponse: self.startGiftResponseThread()
 
     def handleDanmaku(self, danmaku):
@@ -35,7 +36,10 @@ class DanmakuHandler(bili.DanmakuHandler):
             tm = time.strftime(self.date_format, danmaku.time)
             if 'info' in raw:
                 info = raw['info']
-                print '[%s] \033[91m%s\033[0m : \033[94m%s\033[0m' % (tm, info[2][1].encode('utf-8'), info[1].encode('utf-8'))
+                if self.showTime:
+                    print '[%s] \033[91m%s\033[0m : \033[94m%s\033[0m' % (tm, info[2][1].encode('utf-8'), info[1].encode('utf-8'))
+                else:
+                    print '\033[91m%s\033[0m : \033[94m%s\033[0m' % (info[2][1].encode('utf-8'), info[1].encode('utf-8'))
             elif raw['cmd'] == 'SEND_GIFT':
                 data = raw['data']
                 uname, num, giftName = data['uname'].encode('utf-8'), data['num'], data['giftName'].encode('utf-8')
@@ -75,8 +79,11 @@ if __name__ == '__main__':
     roomid = 90012
     if len(argv) == 2:
         roomid = int(argv[1])
+    if len(argv) == 3:
+        roomid = int(argv[1])
+        showTime = int(argv[2])
 
-    py = bili.BiliHelper(roomid, DanmakuHandler(startGiftResponse = True))
+    py = bili.BiliHelper(roomid, DanmakuHandler(startGiftResponse = True, showTime = showTime))
     while 1:
         cmd = raw_input()
         bili_sender.sendDanmaku(roomid, cmd)
