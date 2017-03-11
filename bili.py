@@ -35,6 +35,7 @@ class DanmakuHandler(object):
 class BiliHelper(object):
 
     def __init__(self, roomid, packetHandler):
+        self.lastPacket = 0
         self.cnt = 9
         self.roomid = roomid
         self.heartBeatThreadAlive, self.packetReceiveThreadAlive, self.giftResponseThreadAlive = 0, 0, 0
@@ -90,7 +91,22 @@ class BiliHelper(object):
             print 'heartBeatThread down!'
             self.heartBeatThreadAlive = False
 
+    def handleUnfinishedPacket(self, packet):
+        if self.lastPacket: 
+            if DEBUG: 
+                print '--------------------------'
+                print 'last unfinished packet, ', repr(packet)
+                print '--------------------------'
+            if len(packet) < 16: return packet
+            header = struct.unpack('>IHHII', packet[:16])
+            if header[0] > 0xffff:
+                packet = self.lastPacket + packet
+                if DEBUG: print 'contact last packet, ', repr(packet)
+            self.lastPacket = 0
+        return packet
+
     def parsePacket(self, packet):
+        packet = self.handleUnfinishedPacket(packet)
         try:
             while packet:
                 #print repr(packet)
@@ -101,12 +117,12 @@ class BiliHelper(object):
                 action = header[3]
                 danmaku = Danmaku(action, body, time.localtime(time.time()))
 
-                self.danmakuHandler.handleDanmaku(danmaku)
-
                 if packetLength > len(packet):
                     if DEBUG:
-                        print 'packetLengthError!', packetLength, len(packet), repr(packet[:packetLength]), repr(packet[packetLength:])
+                        print 'packetLengthError!', header, len(packet), repr(packet[:packetLength]), repr(packet[packetLength:])
+                    self.lastPacket = packet
                     break
+                self.danmakuHandler.handleDanmaku(danmaku)
                 packet = packet[packetLength:]
         except SystemExit:  
             return  
@@ -119,7 +135,7 @@ class BiliHelper(object):
                 packet = self.s.recv(BUFFER_SIZE)
                 if packet: self.parsePacket(packet)
         except Exception, e:
-            print 'recvThread down!'
+            print 'recvThread down!', e
             self.packetReceiveThreadAlive = False
 
 if __name__ == '__main__':
