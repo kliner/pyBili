@@ -35,8 +35,6 @@ class DanmakuHandler(object):
 class BiliHelper(object):
 
     def __init__(self, roomid, packetHandler):
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.connect((HOST, PORT))
         self.cnt = 9
         self.roomid = roomid
         self.heartBeatThreadAlive, self.packetReceiveThreadAlive, self.giftResponseThreadAlive = 0, 0, 0
@@ -48,6 +46,8 @@ class BiliHelper(object):
         thread.start_new_thread(self.localCheckThread, ())
 
     def startHeartBeatThread(self):
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s.connect((HOST, PORT))
         self.joinChannel(self.roomid)
         if not self.heartBeatThreadAlive:
             thread.start_new_thread(self.heartBeatThread, ())
@@ -94,6 +94,7 @@ class BiliHelper(object):
         try:
             while packet:
                 #print repr(packet)
+                if len(packet) < 16: return
                 header = struct.unpack('>IHHII', packet[:16])
                 packetLength = int(header[0])
                 body = packet[16:packetLength]

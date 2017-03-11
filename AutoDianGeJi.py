@@ -86,6 +86,7 @@ class DanmakuHandler(bili.DanmakuHandler):
             self.cur_user = None
             self.clear()
             self.printToPlay()
+            print '五分钟到了哦～'
 
     def handleDanmaku(self, danmaku):
         body = danmaku.rawData
@@ -105,6 +106,18 @@ class DanmakuHandler(bili.DanmakuHandler):
                         bili_sender.sendDanmaku(roomid, '%s开始点歌～' % self.cur_user)
                     else:
                         bili_sender.sendDanmaku(roomid, '%s正在点歌, 请等一下哦' % self.cur_user)
+                elif not self.cur_user and content[:6] in ['点歌', '點歌']: 
+                    self.cur_user = user
+                    key = content[6:].strip().lower()
+                    self.clear()
+                    self.printHelp()
+                    print '当前操作者：' + user
+                    self.timer = threading.Timer(300, self.localTimerThread, (user, ))
+                    self.timer.start()
+                    bili_sender.sendDanmaku(roomid, '%s开始点歌～' % self.cur_user)
+                    print '搜索 %s 的结果列表：' % key 
+                    for i, t in enumerate(self.all_music):
+                        if key in t.lower(): print '%d\t: %s' % (i+1, t) 
                 elif user == self.cur_user and content[:6] in ['搜索']:
                     self.clear()
                     key = content[6:].strip().lower()
@@ -124,11 +137,11 @@ class DanmakuHandler(bili.DanmakuHandler):
                         self.LOCK.release()
                         self.clear()
                         self.printToPlay()
-                        bili_sender.sendDanmaku(roomid, '[%s]点歌成功' % music[:9])
+                        bili_sender.sendDanmaku(roomid, '[%s...]点歌成功' % music[:15])
                     except Exception, e:
                         if DEBUG: print e
                         bili_sender.sendDanmaku(roomid, '请输入正确的点歌指令哦')
-                elif content.lower() in ['退出', 'exit']: 
+                elif user == self.cur_user and content.lower() in ['退出', 'exit', '结束', 'quit']: 
                     bili_sender.sendDanmaku(roomid, '欢迎再来点歌哦～')
                     self.cur_user = None
                     if self.timer: self.timer.cancel()
