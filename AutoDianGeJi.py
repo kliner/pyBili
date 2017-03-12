@@ -147,6 +147,9 @@ class DanmakuHandler(bili.DanmakuHandler):
                     if self.timer: self.timer.cancel()
                     self.clear()
                     self.printToPlay()
+                elif user == 'klikli' and content == 'reload':
+                    self.loadMusic()
+                    print '重新加载歌曲库...'
                         
 if __name__ == '__main__':
     argv = sys.argv
