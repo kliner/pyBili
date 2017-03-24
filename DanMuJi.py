@@ -13,15 +13,15 @@ import subprocess
 DEBUG = 0
 
 class DanmakuHandler(bili.DanmakuHandler):
-    def __init__(self, startGiftResponse = False, showTime = False, showNotification = False):
+    def __init__(self, startGiftResponse = False, showTime = False, showNotification = False, showSysGift = False):
+        bili_sender.init()
         self.cnt = 9
         self.notificationTimers = {}
-        self.showNotification = showNotification
+        self.showNotification, self.showTime, self.showSysGift = showNotification, showTime, showSysGift
         self.date_format = '%H:%M:%S'
         self.gifts = []
         self.LOCK = threading.Lock()
         self.giftResponseThreadAlive = False
-        self.showTime = showTime
         if startGiftResponse: self.startGiftResponseThread()
 
     def handleDanmaku(self, danmaku):
@@ -54,9 +54,18 @@ class DanmakuHandler(bili.DanmakuHandler):
                 self.LOCK.release()
             elif raw['cmd'] == 'WELCOME': pass 
             elif raw['cmd'] == 'WELCOME_GUARD': pass 
-            elif raw['cmd'] in ['SYS_GIFT', 'SYS_MSG']: pass
+            elif raw['cmd'] in ['SYS_GIFT']: pass
+            elif raw['cmd'] in ['SYS_MSG']: 
+                #print raw
+                if self.showSysGift and 'roomid' in raw:
+                    roomid = str(raw['roomid'])
+                    tm = time.strftime(self.date_format, time.localtime(time.time() + 180))
+                    #print '%s房间小电视啦，有效期至%s(｡･ω･｡)ﾉ' % (roomid, tm)
+                    bili_sender.sendDanmaku(self.roomid, '%s房间小电视啦，有效期至%s' % (roomid, tm))
+            else: 
+                if DEBUG: print raw
         else:
-            if DEBUG: print 'unknown action,' + repr(packet) 
+            if DEBUG: print 'unknown action,' + repr(danmaku) 
 
     def giftResponseThread(self):
         while 1:
@@ -77,7 +86,6 @@ class DanmakuHandler(bili.DanmakuHandler):
         if not self.giftResponseThreadAlive:
             thread.start_new_thread(self.giftResponseThread, ())
             self.giftResponseThreadAlive = True
-            bili_sender.init()
             if DEBUG: print 'giftResponseThreadStarted!'
 
     def showMacNotification(self, title, content):
@@ -99,14 +107,14 @@ class DanmakuHandler(bili.DanmakuHandler):
 if __name__ == '__main__':
     argv = sys.argv
     roomid = 90012
-    startGiftResponse, showTime, showNotification = False, False, False
+    startGiftResponse, showTime, showNotification, showSysGift = False, False, False, False
     if len(argv) == 2:
         roomid = int(argv[1])
     if len(argv) == 3:
         roomid = int(argv[1])
-        startGiftResponse, showTime, showNotification = int(argv[2][0]), int(argv[2][1]), int(argv[2][2]) 
+        startGiftResponse, showTime, showNotification, showSysGift = int(argv[2][0]), int(argv[2][1]), int(argv[2][2]), int(argv[2][3])
 
-    py = bili.BiliHelper(roomid, DanmakuHandler(startGiftResponse = startGiftResponse, showTime = showTime, showNotification = showNotification))
+    py = bili.BiliHelper(roomid, DanmakuHandler(startGiftResponse = startGiftResponse, showTime = showTime, showNotification = showNotification, showSysGift = showSysGift))
     while 1:
         cmd = raw_input()
         bili_sender.sendDanmaku(roomid, cmd)
