@@ -57,11 +57,15 @@ class DanmakuHandler(bili.DanmakuHandler):
             elif raw['cmd'] in ['SYS_GIFT']: pass
             elif raw['cmd'] in ['SYS_MSG']: 
                 #print raw
-                if self.showSysGift and 'roomid' in raw:
+                if 'roomid' in raw:
                     roomid = str(raw['roomid'])
-                    tm = time.strftime(self.date_format, time.localtime(time.time() + 180))
+                    tm = time.strftime(self.date_format, time.localtime(time.time() + 180 + 18000))
                     #print '%s房间小电视啦，有效期至%s(｡･ω･｡)ﾉ' % (roomid, tm)
-                    bili_sender.sendDanmaku(self.roomid, '%s房间小电视啦，有效期至%s' % (roomid, tm))
+                    if self.showSysGift: bili_sender.sendDanmaku(self.roomid, '%s房间小电视啦，有效期至%s' % (roomid, tm))
+                    tvid = raw['tv_id']
+                    bili_sender.joinSmallTV(roomid, tvid)
+
+
             else: 
                 if DEBUG: print raw
         else:
