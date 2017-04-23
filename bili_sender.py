@@ -40,7 +40,6 @@ def joinSmallTV(roomid, tv_id):
             'id':tv_id,
             '_':int(time.time() * 100)
             }
-    print params
     r = requests.get(TV_URL, params=params, cookies=cookies)
     result = r.content
     raw = json.loads(result)
