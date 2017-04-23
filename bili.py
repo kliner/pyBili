@@ -74,13 +74,16 @@ class BiliHelper(object):
 
     def localCheckThread(self):
         while 1:
-            if not self.heartBeatThreadAlive:
-                print 'detect heartBeatThread down, restarting...'
-                self.startHeartBeatThread()
-            if not self.packetReceiveThreadAlive:
-                print 'detect packetReceiveThread down, restarting...'
-                self.startPacketReceiveThread()
-            time.sleep(60)
+            try:
+                if not self.heartBeatThreadAlive:
+                    print 'detect heartBeatThread down, restarting...'
+                    self.startHeartBeatThread()
+                if not self.packetReceiveThreadAlive:
+                    print 'detect packetReceiveThread down, restarting...'
+                    self.startPacketReceiveThread()
+            except Exception, e:
+                pass
+            time.sleep(10)
 
     def heartBeatThread(self):
         try:
