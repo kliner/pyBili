@@ -22,7 +22,7 @@ def sendDanmaku(roomid, content):
     content = content.strip()
     if not content: return
     params = {
-        "color":16777215,
+        "color":6737151, #16777215-white, #6737151-blue
         "fontsize":25,
         "mode":1,
         "msg":content,
