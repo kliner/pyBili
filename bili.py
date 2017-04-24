@@ -31,7 +31,6 @@ class DanmakuHandler(object):
     def handleDanmaku(self, danmaku):
         pass
 
-
 class BiliHelper(object):
 
     def __init__(self, roomid, packetHandler):

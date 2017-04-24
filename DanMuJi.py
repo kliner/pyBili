@@ -2,6 +2,7 @@
 #coding=utf-8
 import bili
 import bili_sender
+import bili_config
 import thread
 import struct
 import time
@@ -13,11 +14,13 @@ import subprocess
 DEBUG = 0
 
 class DanmakuHandler(bili.DanmakuHandler):
-    def __init__(self, startGiftResponse = False, showTime = False, showNotification = False, showSysGift = False):
-        bili_sender.init()
+    tts_s = None
+
+    def __init__(self, cookies, startGiftResponse = False, showTime = False, showNotification = False, showSysGift = False, tts = False, color = 'white'):
+        self.sender = bili_sender.Sender(cookies)
         self.cnt = 9
         self.notificationTimers = {}
-        self.showNotification, self.showTime, self.showSysGift = showNotification, showTime, showSysGift
+        self.showNotification, self.showTime, self.showSysGift, self.tts, self.color = showNotification, showTime, showSysGift, tts, color
         self.date_format = '%H:%M:%S'
         self.gifts = []
         self.LOCK = threading.Lock()
@@ -46,6 +49,9 @@ class DanmakuHandler(bili.DanmakuHandler):
                     print '\033[91m%s\033[0m : \033[94m%s\033[0m' % (user, content)
                 if self.showNotification:
                     self.showMacNotification(user, content)
+                if self.tts:
+                    self.say(content)
+
             elif raw['cmd'] == 'SEND_GIFT':
                 data = raw['data']
                 uname, num, giftName = data['uname'].encode('utf-8'), data['num'], data['giftName'].encode('utf-8')
@@ -61,10 +67,9 @@ class DanmakuHandler(bili.DanmakuHandler):
                     roomid = str(raw['roomid'])
                     tm = time.strftime(self.date_format, time.localtime(time.time() + 180 + 18000))
                     #print '%s房间小电视啦，有效期至%s(｡･ω･｡)ﾉ' % (roomid, tm)
-                    if self.showSysGift: bili_sender.sendDanmaku(self.roomid, '%s房间小电视啦，有效期至%s' % (roomid, tm))
+                    if self.showSysGift: self.sender.sendDanmaku(self.roomid, '%s房间小电视啦，有效期至%s' % (roomid, tm), self.color)
                     tvid = raw['tv_id']
-                    bili_sender.joinSmallTV(roomid, tvid)
-
+                    self.sender.joinSmallTV(roomid, tvid)
 
             else: 
                 if DEBUG: print raw
@@ -81,7 +86,7 @@ class DanmakuHandler(bili.DanmakuHandler):
                     if t_uname != uname: uname = '大家'
                     if t_giftName != giftName: giftName = '礼物'
                 #print '谢谢%s送的%s个%s' % (uname, str(num), giftName)
-                bili_sender.sendDanmaku(self.roomid, '谢谢%s送的%s个%s' % (uname, str(num), giftName))
+                self.sender.sendDanmaku(self.roomid, '谢谢%s送的%s个%s' % (uname, str(num), giftName), self.color)
                 while self.gifts: self.gifts.pop()
             self.LOCK.release()
             time.sleep(2)
@@ -106,19 +111,34 @@ class DanmakuHandler(bili.DanmakuHandler):
         cmd = "terminal-notifier -remove '%s' > /dev/null" % group
         subprocess.Popen(cmd, shell=True)
 
-
+    def say(self, s):
+        cmd = 'say \'%s\'' % (s)
+        if DEBUG: print cmd
+        if not self.tts_s:
+            self.tts_s = subprocess.Popen(cmd, shell=True)
+        else:
+            self.tts_s.kill()
+            self.tts_s = subprocess.Popen(cmd, shell=True)
 
 if __name__ == '__main__':
     argv = sys.argv
     roomid = 90012
-    startGiftResponse, showTime, showNotification, showSysGift = False, False, False, False
     if len(argv) == 2:
         roomid = int(argv[1])
-    if len(argv) == 3:
-        roomid = int(argv[1])
-        startGiftResponse, showTime, showNotification, showSysGift = int(argv[2][0]), int(argv[2][1]), int(argv[2][2]), int(argv[2][3])
+    config = bili_config.Config('config.txt')
+    cookies = config.cookies
+    data = config.data[str(roomid)]
 
-    py = bili.BiliHelper(roomid, DanmakuHandler(startGiftResponse = startGiftResponse, showTime = showTime, showNotification = showNotification, showSysGift = showSysGift))
+    startGiftResponse = data.get("GiftResponse", False)
+    showTime = data.get("ShowTime", False)
+    showNotification = data.get("MacNotification", False)
+    showSysGift = data.get("SmallTVHint", False) 
+    tts = data.get("MacTTS", False)
+    color = data.get("DanmakuColor", "white")
+    
+    handler = DanmakuHandler(cookies, startGiftResponse = startGiftResponse, showTime = showTime, showNotification = showNotification, showSysGift = showSysGift, tts = tts, color = color)
+
+    py = bili.BiliHelper(roomid, handler)
     while 1:
         cmd = raw_input()
-        bili_sender.sendDanmaku(roomid, cmd)
+        handler.sender.sendDanmaku(roomid, cmd, color)
