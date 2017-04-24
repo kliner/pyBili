@@ -1,0 +1,16 @@
+# mac:
+.DS_Store
+
+# vim:
+*.swp
+
+# Python:
+*.py[cod]
+*.so
+*.egg
+*.egg-info
+dist
+build
+
+# other
+.pypirc

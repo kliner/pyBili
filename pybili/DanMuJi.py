@@ -21,6 +21,16 @@ class DanmakuHandler(bili.DanmakuHandler):
         self.cnt = 9
         self.notificationTimers = {}
         self.showNotification, self.showTime, self.showSysGift, self.tts, self.color = showNotification, showTime, showSysGift, tts, color
+        print '----------------------------'
+        print '| bili danmaku helper v0.1 |' 
+        print '----------------------------'
+        print 'showTime...', self.showTime 
+        print 'giftResponse...', startGiftResponse 
+        print 'showSystemGift...', self.showSysGift
+        print 'macNotification...', self.showNotification
+        print 'macTTS...', self.tts
+        print 'danmakuColor...', self.color
+        print '----------------------------'
         self.date_format = '%H:%M:%S'
         self.gifts = []
         self.LOCK = threading.Lock()
@@ -120,21 +130,20 @@ class DanmakuHandler(bili.DanmakuHandler):
             self.tts_s.kill()
             self.tts_s = subprocess.Popen(cmd, shell=True)
 
-if __name__ == '__main__':
+def main():
     argv = sys.argv
     roomid = 90012
     if len(argv) == 2:
         roomid = int(argv[1])
-    config = bili_config.Config('config.txt')
+    config = bili_config.Config()
     cookies = config.cookies
-    data = config.data[str(roomid)]
 
-    startGiftResponse = data.get("GiftResponse", False)
-    showTime = data.get("ShowTime", False)
-    showNotification = data.get("MacNotification", False)
-    showSysGift = data.get("SmallTVHint", False) 
-    tts = data.get("MacTTS", False)
-    color = data.get("DanmakuColor", "white")
+    startGiftResponse = config.get(roomid, "GiftResponse", False)
+    showTime = config.get(roomid, "ShowTime", False)
+    showNotification = config.get(roomid, "MacNotification", False)
+    showSysGift = config.get(roomid, "SmallTVHint", False) 
+    tts = config.get(roomid, "MacTTS", False)
+    color = config.get(roomid, "DanmakuColor", "white")
     
     handler = DanmakuHandler(cookies, startGiftResponse = startGiftResponse, showTime = showTime, showNotification = showNotification, showSysGift = showSysGift, tts = tts, color = color)
 
@@ -142,3 +151,6 @@ if __name__ == '__main__':
     while 1:
         cmd = raw_input()
         handler.sender.sendDanmaku(roomid, cmd, color)
+
+if __name__ == '__main__':
+    main()
