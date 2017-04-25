@@ -13,7 +13,7 @@ This is a python live.bilibili.com helper library.
 
 # Install
 
-    ` $sudo pip install pybili`
+`$sudo pip install pybili`
 
 # Usage
 
@@ -34,7 +34,7 @@ This is a python live.bilibili.com helper library.
 
 2. Run from your favorite shell.
 
-    ` $bili-danmuji roomid`
+    `$bili-danmuji roomid`
 
 # Note
 
