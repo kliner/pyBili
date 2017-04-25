@@ -30,6 +30,7 @@ class DanmakuHandler(bili.DanmakuHandler):
     timer = None
     config = bili_config.Config()
     sender = bili_sender.Sender(config.cookies)
+    skip = False
 
     def __init__(self):
         self.loadMusic()
@@ -67,8 +68,17 @@ class DanmakuHandler(bili.DanmakuHandler):
         self.p.volume = 8
         length = self.p.length
         self.p.pause()
-        time.sleep(length)
-        if DEBUG: print 'finish play ', name, self.p.filename
+        if DEBUG: print length
+        for i in xrange(int(length)):
+            if self.skip:
+                if DEBUG: print 'skip play ', name, self.p.filename
+                self.p.stop()
+                self.skip = False
+                break
+            time.sleep(1)
+        else:
+            if DEBUG: print 'finish play ', name, self.p.filename
+
 
     def musicThread(self):
         while 1:
@@ -94,10 +104,15 @@ class DanmakuHandler(bili.DanmakuHandler):
         body = danmaku.rawData
         if danmaku.action == 5:
             raw = json.loads(body)
+            if DEBUG: print raw
             if 'info' in raw:
                 info = raw['info']
                 user = info[2][1].encode('utf-8')
+                manager = info[2][2]
                 content = info[1].encode('utf-8')
+                if manager and content in ['切歌']:
+                    self.skip = True
+
                 if content in ['点歌', '點歌']: 
                     if not self.cur_user:
                         self.cur_user = user
