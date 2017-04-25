@@ -13,7 +13,7 @@ This is a python live.bilibili.com helper library.
 
 # Install
 
-$sudo pip install pybili
+    ` $sudo pip install pybili`
 
 # Usage
 
@@ -32,10 +32,15 @@ $sudo pip install pybili
     DanmakuColor=blue
     ```
 
-2. $bili-danmuji roomid
+2. Run from your favorite shell.
+
+    ` $bili-danmuji roomid`
 
 # Note
 
+1. How to get the cookies?
+
+    ![get cookies](/images/get_cookies.png)
 
 # License (MIT)
 
