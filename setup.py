@@ -8,7 +8,7 @@ setup(
   author = 'Kliner',
   author_email = 'kliner@live.cn',
   url = 'https://github.com/kliner/pyBili', # use the URL to the github repo
-  download_url = 'https://github.com/kliner/pyBili/archive/0.1.1.tar.gz', # I'll explain this in a second
+  download_url = 'https://github.com/kliner/pyBili/archive/0.1.2.tar.gz', # I'll explain this in a second
   keywords = ['bili', 'live', 'danmaku'], # arbitrary keywords
   classifiers = [],
 
