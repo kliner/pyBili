@@ -32,7 +32,8 @@ class DanmakuHandler(bili.DanmakuHandler):
     sender = bili_sender.Sender(config.cookies)
     skip = False
 
-    def __init__(self):
+    def __init__(self, roomid):
+        self.roomid = roomid
         self.loadMusic()
         thread.start_new_thread(self.musicThread, ())
 
@@ -120,9 +121,9 @@ class DanmakuHandler(bili.DanmakuHandler):
                         print '当前操作者：' + user
                         self.timer = threading.Timer(300, self.localTimerThread, (user, ))
                         self.timer.start()
-                        self.sender.sendDanmaku(roomid, '%s开始点歌～' % self.cur_user)
+                        self.sender.sendDanmaku(self.roomid, '%s开始点歌～' % self.cur_user)
                     else:
-                        self.sender.sendDanmaku(roomid, '%s正在点歌, 请等一下哦' % self.cur_user)
+                        self.sender.sendDanmaku(self.roomid, '%s正在点歌, 请等一下哦' % self.cur_user)
                 elif not self.cur_user and content[:6] in ['点歌', '點歌']: 
                     self.cur_user = user
                     key = content[6:].strip().lower()
@@ -131,14 +132,14 @@ class DanmakuHandler(bili.DanmakuHandler):
                     print '当前操作者：' + user
                     self.timer = threading.Timer(300, self.localTimerThread, (user, ))
                     self.timer.start()
-                    self.sender.sendDanmaku(roomid, '%s开始点歌～' % self.cur_user)
+                    self.sender.sendDanmaku(self.roomid, '%s开始点歌～' % self.cur_user)
                     print '搜索 %s 的结果列表：' % key 
                     for i, t in enumerate(self.all_music):
                         if key in t.lower(): print '%d\t: %s' % (i+1, t) 
                 elif user == self.cur_user and content[:6] in ['搜索']:
                     self.clear()
                     key = content[6:].strip().lower()
-                    if user != 'klikli': self.sender.sendDanmaku(roomid, '搜索 %s 中...' % key)
+                    if user != 'klikli': self.sender.sendDanmaku(self.roomid, '搜索 %s 中...' % key)
                     print '搜索 %s 的结果列表：' % key 
                     for i, t in enumerate(self.all_music):
                         if key in t.lower(): print '%d\t: %s' % (i+1, t) 
@@ -154,12 +155,12 @@ class DanmakuHandler(bili.DanmakuHandler):
                         self.LOCK.release()
                         self.clear()
                         self.printToPlay()
-                        self.sender.sendDanmaku(roomid, '[%s...]点歌成功' % music[:15])
+                        self.sender.sendDanmaku(self.roomid, '[%s...]点歌成功' % music[:15])
                     except Exception, e:
                         if DEBUG: print e
-                        self.sender.sendDanmaku(roomid, '请输入正确的点歌指令哦')
+                        self.sender.sendDanmaku(self.roomid, '请输入正确的点歌指令哦')
                 elif user == self.cur_user and content.lower() in ['退出', 'exit', '结束', 'quit']: 
-                    self.sender.sendDanmaku(roomid, '欢迎再来点歌哦～')
+                    self.sender.sendDanmaku(self.roomid, '欢迎再来点歌哦～')
                     self.cur_user = None
                     if self.timer: self.timer.cancel()
                     self.clear()
@@ -174,7 +175,7 @@ def main():
     if len(argv) == 2:
         roomid = int(argv[1])
 
-    danmakuHandler = DanmakuHandler()
+    danmakuHandler = DanmakuHandler(roomid)
     py = bili.BiliHelper(roomid, danmakuHandler)
     while 1:
         cmd = raw_input().strip()
