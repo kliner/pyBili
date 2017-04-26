@@ -75,10 +75,10 @@ class BiliHelper(object):
         while 1:
             try:
                 if not self.heartBeatThreadAlive:
-                    print 'detect heartBeatThread down, restarting...'
+                    if DEBUG: print 'detect heartBeatThread down, restarting...'
                     self.startHeartBeatThread()
                 if not self.packetReceiveThreadAlive:
-                    print 'detect packetReceiveThread down, restarting...'
+                    if DEBUG: print 'detect packetReceiveThread down, restarting...'
                     self.startPacketReceiveThread()
             except Exception, e:
                 pass
@@ -90,7 +90,7 @@ class BiliHelper(object):
                 self.sendPacket(2, '')
                 time.sleep(30)
         except Exception, e:
-            print 'heartBeatThread down!'
+            if DEBUG: print 'heartBeatThread down!'
             self.heartBeatThreadAlive = False
 
     def handleUnfinishedPacket(self, packet):
@@ -137,7 +137,7 @@ class BiliHelper(object):
                 packet = self.s.recv(BUFFER_SIZE)
                 if packet: self.parsePacket(packet)
         except Exception, e:
-            print 'recvThread down!', e
+            if DEBUG: print 'recvThread down!', e
             self.packetReceiveThreadAlive = False
 
 if __name__ == '__main__':
