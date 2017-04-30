@@ -35,7 +35,13 @@ class DanmakuHandler(bili.DanmakuHandler):
         self.gifts = []
         self.LOCK = threading.Lock()
         self.giftResponseThreadAlive = False
+        self.sayLOCK = threading.Lock()
+        self.saySentences = []
         if startGiftResponse: self.startGiftResponseThread()
+        if self.tts: self.startTTSThread()
+
+    def startTTSThread(self):
+        thread.start_new_thread(self.sayThread, ())
 
     def handleDanmaku(self, danmaku):
         body = danmaku.rawData
@@ -60,7 +66,7 @@ class DanmakuHandler(bili.DanmakuHandler):
                 if self.showNotification:
                     self.showMacNotification(user, content)
                 if self.tts:
-                    self.say(content)
+                    self.toSay(content)
 
             elif raw['cmd'] == 'SEND_GIFT':
                 data = raw['data']
@@ -126,9 +132,25 @@ class DanmakuHandler(bili.DanmakuHandler):
         if DEBUG: print cmd
         if not self.tts_s:
             self.tts_s = subprocess.Popen(cmd, shell=True)
+            self.tts_s.wait()
         else:
-            self.tts_s.kill()
             self.tts_s = subprocess.Popen(cmd, shell=True)
+            self.tts_s.wait()
+
+    def toSay(self, s):
+        self.sayLOCK.acquire()
+        self.saySentences = [s] + self.saySentences
+        self.sayLOCK.release()
+    
+    def sayThread(self):
+        while 1:
+            while self.saySentences:
+                self.sayLOCK.acquire()
+                s = self.saySentences.pop()
+                self.sayLOCK.release()
+                self.say(s)
+            time.sleep(1)
+
 
 def main():
     argv = sys.argv

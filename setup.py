@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
   name = 'pybili',
   packages = ['pybili'], # this must be the same as the name above
-  version = '0.1.3',
+  version = '0.1.4',
   description = 'A helper library for bilibili.com',
   author = 'Kliner',
   author_email = 'kliner@live.cn',
