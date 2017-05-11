@@ -53,6 +53,8 @@ class Config(object):
                     d['MacNotification'] = self._getboolean(cf, section, 'MacNotification')
                     d['MacTTS'] = self._getboolean(cf, section, 'MacTTS')
                     d['DanmakuColor'] = self._get(cf, section, 'DanmakuColor')
+                    d['AwardSmallTV'] = self._getboolean(cf, section, 'AwardSmallTV')
+                    d['AwardNeedYou'] = self._getboolean(cf, section, 'AwardNeedYou')
                     self.data[section] = d
                 except Exception, e:
                     print 'exception when read config, please check the format of config file ', e
