@@ -106,7 +106,33 @@ class DanmakuHandler(bili.DanmakuHandler):
         keys = key.split(' ')
         if len(keys) > 1: 
             if all(k in music.lower() for k in keys): return True
+
+    def search(self, key):
+        result = []
+        for i, t in enumerate(self.all_music):
+            if self.match(key, t): result += [(i+1, t)]
+        if len(result) == 0: 
+            print 'Sorry...没有找到对应的歌'
+        elif len(result) == 1:
+            self.addToPlayList(result[0][0])
+        else:
+            print '搜索 %s 的结果列表：' % key 
+            for i, t in result:
+                print '%d\t: %s' % (i, t)
+            print '切歌时候会导致搜索结果丢失，请注意重新搜索哦'
         
+    def addToPlayList(self, i):
+        music = self.all_music[i-1]
+        if DEBUG: print self.cur_user, i, music
+        self.LOCK.acquire()
+        if len(self.to_play_lst) < 10:
+            if not any([1 for _, name in self.to_play_lst if name == music]):
+                self.to_play_lst += [(self.cur_user, music)]
+        self.LOCK.release()
+        self.clear()
+        self.printToPlay()
+        self.sender.sendDanmaku(self.roomid, '[%s...]点歌成功' % music[:15])
+
     def handleDanmaku(self, danmaku):
         body = danmaku.rawData
         if danmaku.action == 5:
@@ -139,30 +165,16 @@ class DanmakuHandler(bili.DanmakuHandler):
                     self.timer = threading.Timer(300, self.localTimerThread, (user, ))
                     self.timer.start()
                     self.sender.sendDanmaku(self.roomid, '%s开始点歌～' % self.cur_user)
-                    print '搜索 %s 的结果列表：' % key 
-                    for i, t in enumerate(self.all_music):
-                        if self.match(key, t): print '%d\t: %s' % (i+1, t) 
+                    self.search(key)
                 elif user == self.cur_user and content[:6] in ['搜索']:
                     self.clear()
                     key = content[6:].strip().lower()
                     if user != 'klikli': self.sender.sendDanmaku(self.roomid, '搜索 %s 中...' % key)
-                    print '搜索 %s 的结果列表：' % key 
-                    for i, t in enumerate(self.all_music):
-                        if self.match(key, t): print '%d\t: %s' % (i+1, t) 
-                    print '切歌时候会导致搜索结果丢失，请注意重新搜索哦'
+                    self.search(key)
                 elif user == self.cur_user and content[:6] in ['点歌', '點歌']: 
                     try:
                         i = int(content[6:].strip())
-                        music = self.all_music[i-1]
-                        if DEBUG: print user, i, music
-                        self.LOCK.acquire()
-                        if len(self.to_play_lst) < 10:
-                            if not any([1 for _, name in self.to_play_lst if name == music]):
-                                self.to_play_lst += [(user, music)]
-                        self.LOCK.release()
-                        self.clear()
-                        self.printToPlay()
-                        self.sender.sendDanmaku(self.roomid, '[%s...]点歌成功' % music[:15])
+                        self.addToPlayList(i)
                     except Exception, e:
                         if DEBUG: print e
                         self.sender.sendDanmaku(self.roomid, '请输入正确的点歌指令哦')
