@@ -3,12 +3,12 @@ from distutils.core import setup
 setup(
   name = 'pybili',
   packages = ['pybili'], # this must be the same as the name above
-  version = '0.1.4',
+  version = '0.1.5',
   description = 'A helper library for bilibili.com',
   author = 'Kliner',
   author_email = 'kliner@live.cn',
   url = 'https://github.com/kliner/pyBili', # use the URL to the github repo
-  download_url = 'https://github.com/kliner/pyBili/archive/0.1.3.tar.gz', # I'll explain this in a second
+  download_url = 'https://github.com/kliner/pyBili/archive/0.1.5.tar.gz', # I'll explain this in a second
   keywords = ['bili', 'live', 'danmaku'], # arbitrary keywords
   classifiers = [],
 

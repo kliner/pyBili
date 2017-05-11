@@ -91,8 +91,6 @@ class DanmakuHandler(bili.DanmakuHandler):
                 if u'应援棒' in raw['msg']:
                     roomid = raw['url'].split('/')[-1]
                     tm = time.strftime(self.date_format, time.localtime(time.time() + 18000))
-                    #self.sender.sendDanmaku(self.roomid, '%s房间领应援棒啦，当前时间%s' % (roomid, tm), self.color)
-                    #if self.showSysGift: self.sender.sendDanmaku(self.roomid, '%s房间领应援棒啦，当前时间%s' % (roomid, tm), self.color)
                     if self.awardNeedYou: self.sender.joinNeedYou(roomid)
 
                 if 'roomid' in raw:

@@ -53,8 +53,8 @@ class Sender(object):
         r = requests.post(NEED_YOU_URL, data=params, cookies=self.cookies)
         result = r.content
         raw = json.loads(result)
-        if raw['code'] != 0: print raw['msg']
-        print raw['msg']
+        #if raw['code'] != 0: print raw['msg']
+        #print raw['msg']
 
     def joinNeedYou(self, roomid):
         params = {
@@ -70,8 +70,8 @@ class Sender(object):
                     self._joinNeedYou(roomid, lightenId)
                     self.lightenIds.add(lightenId)
 
-        if raw['code'] != 0: print raw['msg']
-        print self.lightenIds
+        #if raw['code'] != 0: print raw['msg']
+        #print self.lightenIds
 
 def main():
     import bili_config
