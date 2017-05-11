@@ -101,6 +101,12 @@ class DanmakuHandler(bili.DanmakuHandler):
             self.printToPlay()
             print '五分钟到了哦～'
 
+    def match(self, key, music):
+        if key in music.lower(): return True
+        keys = key.split(' ')
+        if len(keys) > 1: 
+            if all(k in music.lower() for k in keys): return True
+        
     def handleDanmaku(self, danmaku):
         body = danmaku.rawData
         if danmaku.action == 5:
@@ -135,14 +141,14 @@ class DanmakuHandler(bili.DanmakuHandler):
                     self.sender.sendDanmaku(self.roomid, '%s开始点歌～' % self.cur_user)
                     print '搜索 %s 的结果列表：' % key 
                     for i, t in enumerate(self.all_music):
-                        if key in t.lower(): print '%d\t: %s' % (i+1, t) 
+                        if self.match(key, t): print '%d\t: %s' % (i+1, t) 
                 elif user == self.cur_user and content[:6] in ['搜索']:
                     self.clear()
                     key = content[6:].strip().lower()
                     if user != 'klikli': self.sender.sendDanmaku(self.roomid, '搜索 %s 中...' % key)
                     print '搜索 %s 的结果列表：' % key 
                     for i, t in enumerate(self.all_music):
-                        if key in t.lower(): print '%d\t: %s' % (i+1, t) 
+                        if self.match(key, t): print '%d\t: %s' % (i+1, t) 
                     print '切歌时候会导致搜索结果丢失，请注意重新搜索哦'
                 elif user == self.cur_user and content[:6] in ['点歌', '點歌']: 
                     try:
@@ -151,7 +157,8 @@ class DanmakuHandler(bili.DanmakuHandler):
                         if DEBUG: print user, i, music
                         self.LOCK.acquire()
                         if len(self.to_play_lst) < 10:
-                            self.to_play_lst += [(user, music)]
+                            if not any([1 for _, name in self.to_play_lst if name == music]):
+                                self.to_play_lst += [(user, music)]
                         self.LOCK.release()
                         self.clear()
                         self.printToPlay()

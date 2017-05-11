@@ -49,6 +49,7 @@ class DanmakuHandler(bili.DanmakuHandler):
         self.saySentences = []
         if self.startGiftResponse: self.startGiftResponseThread()
         if self.tts: self.startTTSThread()
+        if self.showNotification: pass
 
     def startTTSThread(self):
         thread.start_new_thread(self.sayThread, ())
@@ -129,6 +130,8 @@ class DanmakuHandler(bili.DanmakuHandler):
 
     def showMacNotification(self, title, content):
 
+        title = title.replace('\'', ' ')
+        content = content.replace('\'', ' ')
         cmd = "terminal-notifier -title '%s' -message '%s' -group '%s' > /dev/null" % (title, content, title)
         # cmd = 'osascript -e \'display notification "%s" with title "%s"\'' % (content, title)
         subprocess.Popen(cmd, shell=True)
