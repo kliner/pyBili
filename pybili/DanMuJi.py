@@ -10,10 +10,12 @@ import json
 import threading
 import sys
 import subprocess
+import signal
 
 DEBUG = 0
 
 class DanmakuHandler(bili.DanmakuHandler):
+    log = open('/Users/kliner/blog/' + time.strftime('%d-%H%M%S', time.localtime(time.time() + 18000)) + '.log', 'w')
     tts_s = None
 
     def __init__(self, roomid, cookies, config):
@@ -50,6 +52,7 @@ class DanmakuHandler(bili.DanmakuHandler):
         if self.startGiftResponse: self.startGiftResponseThread()
         if self.tts: self.startTTSThread()
         if self.showNotification: pass
+        signal.signal(signal.SIGINT, self.signal_handler)
 
     def startTTSThread(self):
         thread.start_new_thread(self.sayThread, ())
@@ -78,6 +81,7 @@ class DanmakuHandler(bili.DanmakuHandler):
                     self.showMacNotification(user, content)
                 if self.tts:
                     self.toSay(content)
+                self.log.write('%s, %s, %s\n' % (user, content, tm))
 
             elif raw['cmd'] == 'SEND_GIFT':
                 data = raw['data']
@@ -167,6 +171,11 @@ class DanmakuHandler(bili.DanmakuHandler):
                 self.sayLOCK.release()
                 self.say(s)
             time.sleep(1)
+    
+    def signal_handler(self, signal, frame):
+        print('exit... saving info...')
+        self.log.close()
+        sys.exit(0)
 
 
 def main():
