@@ -112,10 +112,11 @@ class DanmakuHandler(bili.DanmakuHandler):
         for i, t in enumerate(self.all_music):
             if self.match(key, t): result += [(i+1, t)]
         if len(result) == 0: 
-            print 'Sorry...没有找到对应的歌'
+            self.sender.sendDanmaku(self.roomid, 'Sorry...这里没有对应的歌')
         elif len(result) == 1:
             self.addToPlayList(result[0][0])
         else:
+            if self.cur_user != 'klikli': self.sender.sendDanmaku(self.roomid, '搜索 %s 中...' % key)
             print '搜索 %s 的结果列表：' % key 
             for i, t in result:
                 print '%d\t: %s' % (i, t)
@@ -157,6 +158,8 @@ class DanmakuHandler(bili.DanmakuHandler):
                     else:
                         self.sender.sendDanmaku(self.roomid, '%s正在点歌, 请等一下哦' % self.cur_user)
                 elif not self.cur_user and content[:6] in ['点歌', '點歌']: 
+                    k = content[6:]
+                    if k[0] != ' ': return
                     self.cur_user = user
                     key = content[6:].strip().lower()
                     self.clear()
@@ -169,7 +172,6 @@ class DanmakuHandler(bili.DanmakuHandler):
                 elif user == self.cur_user and content[:6] in ['搜索']:
                     self.clear()
                     key = content[6:].strip().lower()
-                    if user != 'klikli': self.sender.sendDanmaku(self.roomid, '搜索 %s 中...' % key)
                     self.search(key)
                 elif user == self.cur_user and content[:6] in ['点歌', '點歌']: 
                     try:
