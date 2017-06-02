@@ -12,11 +12,33 @@ import os
 import mplayer
 import random
 import threading
+import subprocess
 
 reload(sys)  
 sys.setdefaultencoding('utf8')
 
 DEBUG = 0
+
+class Music(object):
+
+    def __init__(self, s):
+        self.name = s
+        self.sname = s
+        self.ename = s
+
+    def __init__(self, n, s, e):
+        self.name = n
+        self.sname = s
+        self.ename = e
+
+    def __str__(self):
+        return self.searchKey()
+
+    def __repr__(self):
+        return self.__str__()
+
+    def searchKey(self):
+        return '%s %s %s' % (self.name, self.sname, self.ename)
 
 class DanmakuHandler(bili.DanmakuHandler):
     
@@ -50,7 +72,17 @@ class DanmakuHandler(bili.DanmakuHandler):
         for u, m in self.to_play_lst: print '%s 点了\t: %s' % (u, m) 
 
     def loadMusic(self):
-        self.all_music = [f[:-4] for f in os.listdir(self.lib_path) if f[-4:] == '.mp3']
+        origin_music = [f[:-4] for f in os.listdir(self.lib_path) if f[-4:] == '.mp3']
+        with open('ti', 'w') as f:
+            f.write('\n'.join(origin_music))
+        
+        subprocess.Popen('opencc -i ti -o to -c t2s.json', shell=True)
+
+        with open('to', 'r') as f:
+            lst = f.read().split('\n')
+            self.all_music = [Music(n,s,n) for n, s in zip(origin_music, lst)]
+           
+        if DEBUG: print self.all_music
         if DEBUG: print self.all_music[0], len(self.all_music)
         
     def playMusic(self, name):
@@ -85,12 +117,12 @@ class DanmakuHandler(bili.DanmakuHandler):
         while 1:
             if self.to_play_lst:
                 self.LOCK.acquire()
-                u, name = self.to_play_lst.pop(0)
+                u, music = self.to_play_lst.pop(0)
                 self.LOCK.release()
-                self.playMusic(name)
+                self.playMusic(music.name)
             else:
-                name = random.choice(self.all_music)
-                self.playMusic(name)
+                music = random.choice(self.all_music)
+                self.playMusic(music.name)
             if not self.cur_user:
                 self.printToPlay()
 
@@ -109,8 +141,8 @@ class DanmakuHandler(bili.DanmakuHandler):
 
     def search(self, key):
         result = []
-        for i, t in enumerate(self.all_music):
-            if self.match(key, t): result += [(i+1, t)]
+        for i, m in enumerate(self.all_music):
+            if self.match(key, m.searchKey()): result += [(i+1, m.name)]
         if len(result) == 0: 
             self.sender.sendDanmaku(self.roomid, 'Sorry...这里没有对应的歌')
         elif len(result) == 1:
@@ -210,6 +242,8 @@ def main():
                 print 'pause'
         elif cmd == 'r':
             danmakuHandler.loadMusic()
+        else:
+            danmakuHandler.search(cmd)
 
                         
 if __name__ == '__main__':

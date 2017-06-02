@@ -3,6 +3,7 @@
 import requests
 import json
 import time 
+import sys
 import random
 
 SEND_URL = 'http://live.bilibili.com/msg/send'
@@ -13,23 +14,26 @@ class Sender(object):
         self.cookies = cookies
 
     def sendDanmaku(self, roomid, content, color='white'):
-        content = content.strip()
-        if not content: return
-        if color == 'blue': color = 6737151
-        elif color == 'green': color = 8322816
-        else: color = 16777215 # white
-        params = {
-            "color":color, 
-            "fontsize":25,
-            "mode":1,
-            "msg":content,
-            "rnd":int(time.time()),
-            "roomid":roomid
-            }
-        r = requests.post(SEND_URL, data=params, cookies=self.cookies)
-        result = r.content
-        raw = json.loads(result)
-        if raw['code'] != 0: print raw['msg']
+        try:
+            content = content.strip()
+            if not content: return
+            if color == 'blue': color = 6737151
+            elif color == 'green': color = 8322816
+            else: color = 16777215 # white
+            params = {
+                "color":color, 
+                "fontsize":25,
+                "mode":1,
+                "msg":content,
+                "rnd":int(time.time()),
+                "roomid":roomid
+                }
+            r = requests.post(SEND_URL, data=params, cookies=self.cookies)
+            result = r.content
+            raw = json.loads(result)
+            if raw['code'] != 0: print raw['msg']
+        except:
+            print 'send danmaku error:', sys.exc_info()[0]
     
 
 lst = '''
@@ -93,7 +97,8 @@ def main():
     date_format = '%m%d-%H%M%S'
     config = bili_config.Config()
     sender = Sender(config.cookies)
-    for s in lst: print s
+    #for s in lst: print s
+    print "danmakus count:", len(lst)
     while 1:
         tm = time.localtime(time.time() + 18000)
         mins = int(time.strftime('%M', tm))
