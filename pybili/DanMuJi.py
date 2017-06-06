@@ -86,7 +86,6 @@ def main():
     if config.get(roomid, "SmallTVHint", False): danmakuHandlers += [RewardResponseHandler(sender)]
     print '----------------------------'
 
-    for handler in danmakuHandlers: handler.setRoomId(roomid)
     py = bili.BiliHelper(roomid, *danmakuHandlers)
     while 1:
         cmd = raw_input()

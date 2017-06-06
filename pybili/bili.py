@@ -51,11 +51,10 @@ class BiliHelper(object):
     def __init__(self, roomid, *packetHandlers):
         self.lastPacket = 0
         self.roomid = roomid
-        self.heartBeatThreadAlive, self.packetReceiveThreadAlive, self.giftResponseThreadAlive = 0, 0, 0
         self.danmakuHandlers = packetHandlers
         for handler in packetHandlers: handler.setRoomId(roomid)
-        self.startHeartBeatThread()
-        self.startPacketReceiveThread()
+        self.heartBeatThreadAlive, self.packetReceiveThreadAlive = 0, 0
+        self.startHeartBeatThread(), self.startPacketReceiveThread()
         time.sleep(5) # wait 5s for thread start
         thread.start_new_thread(self.localCheckThread, ())
 
@@ -83,7 +82,6 @@ class BiliHelper(object):
     def joinChannel(self, channelId, uid = int(1e14 + 2e14 * random.random())):
         body = json.dumps({'roomid':channelId, 'uid': uid}, separators=(',',':'))
         self.sendPacket(7, body)
-        return 1
 
     def localCheckThread(self):
         while 1:
@@ -94,9 +92,9 @@ class BiliHelper(object):
                 if not self.packetReceiveThreadAlive:
                     if DEBUG: print 'detect packetReceiveThread down, restarting...'
                     self.startPacketReceiveThread()
-            except Exception, e:
+            except:
                 pass
-            time.sleep(10)
+            time.sleep(5)
 
     def heartBeatThread(self):
         try:
@@ -125,7 +123,6 @@ class BiliHelper(object):
         packet = self.handleUnfinishedPacket(packet)
         try:
             while packet:
-                #print repr(packet)
                 if len(packet) < 16: return
                 header = struct.unpack('>IHHII', packet[:16])
                 packetLength = int(header[0])
@@ -156,4 +153,3 @@ class BiliHelper(object):
 
 if __name__ == '__main__':
     pass
-
