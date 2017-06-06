@@ -69,7 +69,7 @@ class DanmakuHandler(bili.DanmakuHandler):
 
     def printToPlay(self):
         print '当前待播放列表：'
-        for u, m in self.to_play_lst: print '%s 点了\t: %s' % (u, m) 
+        for u, m in self.to_play_lst: print '%s 点了\t: %s' % (u, m.name) 
 
     def loadMusic(self):
         origin_music = [f[:-4] for f in os.listdir(self.lib_path) if f[-4:] == '.mp3']
@@ -155,16 +155,16 @@ class DanmakuHandler(bili.DanmakuHandler):
             print '切歌时候会导致搜索结果丢失，请注意重新搜索哦'
         
     def addToPlayList(self, i):
-        music = self.all_music[i-1]
-        if DEBUG: print self.cur_user, i, music
+        to_add = self.all_music[i-1]
+        if DEBUG: print self.cur_user, i, to_add 
         self.LOCK.acquire()
         if len(self.to_play_lst) < 10:
-            if not any([1 for _, name in self.to_play_lst if name == music]):
-                self.to_play_lst += [(self.cur_user, music)]
+            if not any([1 for _, music in self.to_play_lst if music.name == to_add.name]):
+                self.to_play_lst += [(self.cur_user, to_add)]
         self.LOCK.release()
         self.clear()
         self.printToPlay()
-        self.sender.sendDanmaku(self.roomid, '[%s...]点歌成功' % music[:15])
+        self.sender.sendDanmaku(self.roomid, '[%s...]点歌成功' % to_add.name[:15])
 
     def handleDanmaku(self, danmaku):
         body = danmaku.rawData
