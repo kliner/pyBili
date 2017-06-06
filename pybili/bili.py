@@ -31,18 +31,32 @@ class DanmakuHandler(object):
     def handleDanmaku(self, danmaku):
         pass
 
+class SimpleDanmakuHandler(DanmakuHandler):
+
+    def handleDanmaku(self, danmaku):
+        if hasattr(danmaku, 'json'): return
+        body = danmaku.rawData
+        if not body: return
+        if danmaku.action == 5:
+            raw = json.loads(body)
+            danmaku.json = raw
+            if 'info' in raw:
+                info = raw['info']
+                user, content = info[2][1].encode('utf-8'), info[1].encode('utf-8')
+                danmaku.user = user
+                danmaku.text = content
+
 class BiliHelper(object):
 
-    def __init__(self, roomid, packetHandler):
+    def __init__(self, roomid, *packetHandlers):
         self.lastPacket = 0
-        self.cnt = 9
         self.roomid = roomid
         self.heartBeatThreadAlive, self.packetReceiveThreadAlive, self.giftResponseThreadAlive = 0, 0, 0
-        self.danmakuHandler = packetHandler
-        packetHandler.setRoomId(roomid)
+        self.danmakuHandlers = packetHandlers
+        for handler in packetHandlers: handler.setRoomId(roomid)
         self.startHeartBeatThread()
         self.startPacketReceiveThread()
-        time.sleep(5) # sleep 5s for thread start
+        time.sleep(5) # wait 5s for thread start
         thread.start_new_thread(self.localCheckThread, ())
 
     def startHeartBeatThread(self):
@@ -124,7 +138,7 @@ class BiliHelper(object):
                         print 'packetLengthError!', header, len(packet), repr(packet[:packetLength]), repr(packet[packetLength:])
                     self.lastPacket = packet
                     break
-                self.danmakuHandler.handleDanmaku(danmaku)
+                for handler in self.danmakuHandlers: handler.handleDanmaku(danmaku)
                 packet = packet[packetLength:]
         except SystemExit:  
             return  
@@ -141,5 +155,5 @@ class BiliHelper(object):
             self.packetReceiveThreadAlive = False
 
 if __name__ == '__main__':
-    while 1:
-        cmd = raw_input()
+    pass
+
