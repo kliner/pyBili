@@ -14,6 +14,7 @@ class Config(object):
             print path
             print 'warning! please set the config file!'
             return 
+        self.path = path
         self.read(path)
 
     def get(self, dataid, key, value = None):
@@ -54,14 +55,49 @@ class Config(object):
                     d['MacTTS'] = self._getboolean(cf, section, 'MacTTS')
                     d['DanmakuColor'] = self._get(cf, section, 'DanmakuColor')
                     d['AwardSmallTV'] = self._getboolean(cf, section, 'AwardSmallTV')
-                    d['AwardNeedYou'] = self._getboolean(cf, section, 'AwardNeedYou')
+                    d['RecordDanmaku'] = self._getboolean(cf, section, 'RecordDanmaku')
                     self.data[section] = d
                 except Exception, e:
                     print 'exception when read config, please check the format of config file ', e
 
+    def p(self):
+        print 'current configs:'
+        for k in self.data.keys():
+            print '----------'
+            print k
+            for kk in self.data[k].keys():
+                print kk, self.data[k][kk]
+
+    def inputBoolean(self, msg):
+        a = raw_input(msg)
+        return a in 'Yy1'
+
+    def setup(self):
+        cf = ConfigParser.RawConfigParser()
+        cf.read(self.path)
+
+        roomid = raw_input('Please input the roomid to setup:')
+        if cf.has_section(roomid): sec = roomid
+        else: sec = cf.add_section(roomid)
+
+        b = self.inputBoolean('Auto-response the gift? [y/n]')
+        cf.set(sec, 'GiftResponse', b)
+        b = self.inputBoolean('Show the time of the danmaku in console? [y/n]')
+        cf.set(sec, 'ShowTime', b)
+        b = self.inputBoolean('Auto-response the smallTV? [y/n]')
+        cf.set(sec, 'SmallTVHint', b)
+        b = self.inputBoolean('Auto-enter the lottery of the smallTV? [y/n]')
+        cf.set(sec, 'AwardSmallTV', b)
+        b = self.inputBoolean('Show notification in the Mac OS? [y/n]')
+        cf.set(sec, 'MacNotification', b)
+        b = self.inputBoolean('Speak the danmaku out in the Mac OS? [y/n]')
+        cf.set(sec, 'MacTTS', b)
+        b = self.inputBoolean('Record the danmaku into the MongoDB? [y/n]')
+        cf.set(sec, 'RecordDanmaku', b)
+        cf.set(sec, 'DanmakuColor', raw_input('Danmaku color? [white/red/orange/yellow/green/cyan/blue/purple]'))
+        cf.write(open(self.path, 'w'))
+
 if __name__ == '__main__':
     config = Config()
-    print config.data["90012"]
-    print config.data["30040"]
-    print config.get(90012, "MacTTS", False)
-
+    config.p()
+    config.setup()

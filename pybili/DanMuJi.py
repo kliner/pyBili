@@ -19,14 +19,11 @@ class DanmakuHandler(bili.DanmakuHandler):
     def __init__(self, roomid, config):
         self.cnt = 9
         self.showTime = config.get(roomid, "ShowTime", False)
-        self.color = config.get(roomid, "DanmakuColor", "white")
+        #self.color = config.get(roomid, "DanmakuColor", "white")
     
         print '----------------------------'
-        print '| bili danmaku helper v0.2 |' 
-        print '----------------------------'
         print 'showTime...', self.showTime 
-        print 'danmakuColor...', self.color
-        print '----------------------------'
+        #print 'danmakuColor...', self.color
         self.date_format = '%H:%M:%S'
             
         signal.signal(signal.SIGINT, self.signal_handler)
@@ -67,7 +64,7 @@ class DanmakuHandler(bili.DanmakuHandler):
         self.log.close()
         sys.exit(0)
 
-def main():
+def initHandlers():
     argv = sys.argv
     roomid = 90012
     if len(argv) == 2: roomid = int(argv[1])
@@ -76,17 +73,20 @@ def main():
 
     handler = DanmakuHandler(roomid, config = config)
     sender = bili_sender.Sender(cookies)
-    color = config.get(roomid, "DanmakuColor", "white")
 
-    danmakuHandlers = [handler, MongoHandler()]
+    danmakuHandlers = [handler]
+    if config.get(roomid, "RecordDanmaku", False): danmakuHandlers += [MongoHandler()]
     if config.get(roomid, "MacTTS", False): danmakuHandlers += [TTSHandler()]
     if config.get(roomid, "MacNotification", False): danmakuHandlers += [NotifcationHandler()]
     if config.get(roomid, "GiftResponse", False): danmakuHandlers += [GiftResponseHandler(sender)]
     if config.get(roomid, "AwardSmallTV", False): danmakuHandlers += [AutoRewardHandler(sender)]
     if config.get(roomid, "SmallTVHint", False): danmakuHandlers += [RewardResponseHandler(sender)]
-    print '----------------------------'
+    return danmakuHandlers
 
-    py = bili.BiliHelper(roomid, *danmakuHandlers)
+def main():
+    
+    py = bili.BiliHelper(roomid, *initHandlers())
+    color = config.get(roomid, "DanmakuColor", "white")
     while 1:
         cmd = raw_input()
         sender.sendDanmaku(roomid, cmd, color)

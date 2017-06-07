@@ -49,6 +49,9 @@ class SimpleDanmakuHandler(DanmakuHandler):
 class BiliHelper(object):
 
     def __init__(self, roomid, *packetHandlers):
+        print '----------------------------'
+        print '| bili danmaku helper v0.2 |' 
+        print '----------------------------'
         self.lastPacket = 0
         self.roomid = roomid
         self.danmakuHandlers = packetHandlers
