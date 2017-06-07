@@ -129,7 +129,7 @@ class GiftResponseHandler(SimpleDanmakuHandler):
                     num = '好多'
                     if t_uname != uname: uname = '大家'
                     if t_giftName != giftName: giftName = '礼物'
-                self.sender.sendDanmaku(self.roomid, '谢谢%s送的%s个%s' % (uname, str(num), giftName), self.color)
+                self.sender.sendDanmaku(self.roomid, '谢谢%s送的%s个%s' % (uname, str(num), giftName))
                 while self.gifts: self.gifts.pop()
             self.LOCK.release()
             time.sleep(2)
@@ -152,7 +152,7 @@ class RewardResponseHandler(SimpleDanmakuHandler):
                 if 'roomid' in raw:
                     roomid = str(raw['roomid'])
                     tm = time.strftime(self.date_format, time.localtime(time.time() + 180 + 18000))
-                    self.sender.sendDanmaku(self.roomid, '%s房间小电视啦，有效期至%s' % (roomid, tm), self.color)
+                    self.sender.sendDanmaku(self.roomid, '%s房间小电视啦，有效期至%s' % (roomid, tm))
 
 class AutoRewardHandler(SimpleDanmakuHandler):
 
