@@ -12,11 +12,12 @@ setup(
   keywords = ['bili', 'live', 'danmaku'], # arbitrary keywords
   classifiers = [],
 
-  install_requires=['requests'],
+  install_requires=['requests', 'pymongo'],
 
   entry_points={
     'console_scripts':[
-      'bili-danmuji = pybili.DanMuJi:main',
+      'bili-danmuji = pybili.GUI:main',
+      'bili-dm = pybili.DanMuJi:main',
       'bili-music = pybili.AutoDianGeJi:main',
       'bili-sender = pybili.bili_sender:main',
     ]
