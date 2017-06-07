@@ -4,7 +4,7 @@ This is a python live.bilibili.com helper library.
 
 # Function
 
-* Danmaku receiver / sender.
+* Danmaku receiver / sender with GUI support.
 * Auto join SmallTV.
 * Mac Notification / TTS.
 * A basic music VOD.
@@ -32,6 +32,12 @@ This is a python live.bilibili.com helper library.
     DanmakuColor=blue
     ```
 
+    Also you can use 
+
+    `$ bili-config`
+
+    to setup this config file.
+
 2. Run from your favorite shell.
 
     `$ bili-danmuji roomid`
@@ -47,6 +53,12 @@ This is a python live.bilibili.com helper library.
     Install the terminal-notifier through 
     
     `$ brew install terminal-notifier`
+
+3. How to record the danmakus?
+
+    Install the MongoDB through
+
+    `$ brew install mongodb[1](https://docs.mongodb.com/master/tutorial/install-mongodb-on-os-x/)`
 
 # License (MIT)
 

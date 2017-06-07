@@ -1,4 +1,5 @@
 #!/usr/bin/env python      
+import sys
 import Tkinter as tk       
 import DanMuJi
 import bili
@@ -37,7 +38,7 @@ def main():
     if len(argv) == 2: roomid = int(argv[1])
 
     app = Application()                      
-    danmakuHandlers = DanMuJi.initHandlers() + [GUIDanmakuHandler(app.w)]
+    danmakuHandlers = DanMuJi.initHandlers(roomid) + [GUIDanmakuHandler(app.w)]
     bili.BiliHelper(roomid, *danmakuHandlers)
     app.master.title('bilibili danmaku helper')
     app.mainloop()                           

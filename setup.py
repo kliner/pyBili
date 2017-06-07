@@ -8,7 +8,7 @@ setup(
   author = 'Kliner',
   author_email = 'kliner@live.cn',
   url = 'https://github.com/kliner/pyBili', # use the URL to the github repo
-  download_url = 'https://github.com/kliner/pyBili/archive/0.1.5.tar.gz', # I'll explain this in a second
+  download_url = 'https://github.com/kliner/pyBili/archive/0.2.0.tar.gz',
   keywords = ['bili', 'live', 'danmaku'], # arbitrary keywords
   classifiers = [],
 
@@ -20,6 +20,7 @@ setup(
       'bili-dm = pybili.DanMuJi:main',
       'bili-music = pybili.AutoDianGeJi:main',
       'bili-sender = pybili.bili_sender:main',
+      'bili-config = pybili.bili_config:main',
     ]
   }
 )

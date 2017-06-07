@@ -76,28 +76,36 @@ class Config(object):
         cf = ConfigParser.RawConfigParser()
         cf.read(self.path)
 
-        roomid = raw_input('Please input the roomid to setup:')
-        if cf.has_section(roomid): sec = roomid
-        else: sec = cf.add_section(roomid)
+        cookies = raw_input('Please input the cookies: [press enter to skip]')
+        if cookies:
+            if not cf.has_section('cookies'): cf.add_section('cookies')
+            cf.set('cookies', 'cookies', cookies)
 
-        b = self.inputBoolean('Auto-response the gift? [y/n]')
-        cf.set(sec, 'GiftResponse', b)
-        b = self.inputBoolean('Show the time of the danmaku in console? [y/n]')
-        cf.set(sec, 'ShowTime', b)
-        b = self.inputBoolean('Auto-response the smallTV? [y/n]')
-        cf.set(sec, 'SmallTVHint', b)
-        b = self.inputBoolean('Auto-enter the lottery of the smallTV? [y/n]')
-        cf.set(sec, 'AwardSmallTV', b)
-        b = self.inputBoolean('Show notification in the Mac OS? [y/n]')
-        cf.set(sec, 'MacNotification', b)
-        b = self.inputBoolean('Speak the danmaku out in the Mac OS? [y/n]')
-        cf.set(sec, 'MacTTS', b)
-        b = self.inputBoolean('Record the danmaku into the MongoDB? [y/n]')
-        cf.set(sec, 'RecordDanmaku', b)
-        cf.set(sec, 'DanmakuColor', raw_input('Danmaku color? [white/red/orange/yellow/green/cyan/blue/purple]'))
+        roomid = raw_input('Please input the roomid to setup: [press enter to skip]')
+        if roomid:
+            if not cf.has_section(roomid): cf.add_section(roomid)
+
+            b = self.inputBoolean('Auto-response the gift? [y/n]')
+            cf.set(sec, 'GiftResponse', b)
+            b = self.inputBoolean('Show the time of the danmaku in console? [y/n]')
+            cf.set(sec, 'ShowTime', b)
+            b = self.inputBoolean('Auto-response the smallTV? [y/n]')
+            cf.set(sec, 'SmallTVHint', b)
+            b = self.inputBoolean('Auto-enter the lottery of the smallTV? [y/n]')
+            cf.set(sec, 'AwardSmallTV', b)
+            b = self.inputBoolean('Show notification in the Mac OS? [y/n]')
+            cf.set(sec, 'MacNotification', b)
+            b = self.inputBoolean('Speak the danmaku out in the Mac OS? [y/n]')
+            cf.set(sec, 'MacTTS', b)
+            b = self.inputBoolean('Record the danmaku into the MongoDB? [y/n]')
+            cf.set(sec, 'RecordDanmaku', b)
+            cf.set(sec, 'DanmakuColor', raw_input('Danmaku color? [white/red/orange/yellow/green/cyan/blue/purple]'))
         cf.write(open(self.path, 'w'))
 
-if __name__ == '__main__':
+def main():
     config = Config()
     config.p()
     config.setup()
+
+if __name__ == '__main__':
+    main()

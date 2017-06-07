@@ -64,10 +64,7 @@ class DanmakuHandler(bili.DanmakuHandler):
         self.log.close()
         sys.exit(0)
 
-def initHandlers():
-    argv = sys.argv
-    roomid = 90012
-    if len(argv) == 2: roomid = int(argv[1])
+def initHandlers(roomid):
     config = bili_config.Config()
     cookies = config.cookies
 
@@ -84,12 +81,18 @@ def initHandlers():
     return danmakuHandlers
 
 def main():
+    argv = sys.argv
+    roomid = 90012
+    if len(argv) == 2: roomid = int(argv[1])
+
+    py = bili.BiliHelper(roomid, *initHandlers(roomid))
     
-    py = bili.BiliHelper(roomid, *initHandlers())
-    color = config.get(roomid, "DanmakuColor", "white")
+    config = bili_config.Config()
+    cookies = config.cookies
+    sender = bili_sender.Sender(cookies)
     while 1:
         cmd = raw_input()
-        sender.sendDanmaku(roomid, cmd, color)
+        sender.sendDanmaku(roomid, cmd)
 
 if __name__ == '__main__':
     main()
