@@ -5,6 +5,7 @@ import json
 import thread
 import threading
 import subprocess
+import re
 
 from bili import DanmakuHandler
 from bili import SimpleDanmakuHandler
@@ -56,7 +57,9 @@ class TTSHandler(SimpleDanmakuHandler):
            self.toSay(danmaku.text)
 
     def say(self, s):
-        cmd = 'say \'%s\'' % (s)
+        t = re.sub(r'23[3]+', ' 2 3 3 ', s)
+        t = re.sub(r'66[6]+', ' 6 6 6 ', t)
+        cmd = 'say \'%s\'' % (t)
         if DEBUG: print cmd
         self.tts_s = subprocess.Popen(cmd, shell=True)
         self.tts_s.wait()

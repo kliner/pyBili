@@ -4,12 +4,10 @@ This is a python live.bilibili.com helper library.
 
 # Function
 
-* Danmaku receiver / sender with GUI support.
-* Auto join SmallTV.
-* Mac Notification / TTS.
+* Danmaku helper with GUI.
+* Mac Notification/TTS.
 * A basic music VOD.
-* Gift auto response.
-* Easy to add new functions.
+* Auto join/response SmallTV.
 
 # Install
 
@@ -58,7 +56,7 @@ This is a python live.bilibili.com helper library.
 
     Install the MongoDB through
 
-    `$ brew install mongodb[1](https://docs.mongodb.com/master/tutorial/install-mongodb-on-os-x/)`
+    `$ brew install mongodb` [more](https://docs.mongodb.com/master/tutorial/install-mongodb-on-os-x/)
 
 # License (MIT)
 
