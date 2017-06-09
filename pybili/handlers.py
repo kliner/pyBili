@@ -16,12 +16,18 @@ DEBUG = 0
 class MongoHandler(DanmakuHandler):
 
     def __init__(self):
-        print 'start db logger...'
-        self.client = MongoClient()
-        self.db = self.client.danmaku
+        try:
+            print 'start db logger...'
+            self.client = MongoClient()
+            self.db = self.client.danmaku
+        except:
+            print 'mongodb service down!\nto install:[brew install mongodb]\nto start:[brew services start mongodb]'
 
     def handleDanmaku(self, danmaku):
-        self.insert(danmaku)
+        try:
+            self.insert(danmaku)
+        except:
+            pass
 
     def insert(self, danmaku):
         danmaku.roomid = self.roomid
