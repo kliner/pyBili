@@ -14,7 +14,7 @@ from handlers import *
 DEBUG = 0
 
 class DanmakuHandler(bili.DanmakuHandler):
-    log = open('/Users/kliner/blog/' + time.strftime('%d-%H%M%S', time.localtime(time.time() + 18000)) + '.log', 'w')
+    #log = open('/Users/kliner/blog/' + time.strftime('%d-%H%M%S', time.localtime(time.time() + 18000)) + '.log', 'w')
 
     def __init__(self, roomid, config):
         self.cnt = 9
@@ -61,7 +61,7 @@ class DanmakuHandler(bili.DanmakuHandler):
     
     def signal_handler(self, signal, frame):
         print('exit... saving info...')
-        self.log.close()
+        #self.log.close()
         sys.exit(0)
 
 def initHandlers(roomid):
