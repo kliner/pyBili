@@ -17,6 +17,7 @@ import subprocess
 import traceback
 import pymongo
 from pymongo import MongoClient
+from bson.objectid import ObjectId
 
 reload(sys)  
 sys.setdefaultencoding('utf8')
@@ -56,14 +57,23 @@ class DBHelper(object):
 
     def removeFavorite(self, danmaku, name):
         if self.db:
-            self.db.fav.delete_one({'user': danmaku.user, 'name':name})
+            cursor = self.db.fav.find({'user': danmaku.user}).sort([('time', pymongo.DESCENDING)])
+            i = 0
+            for d in cursor:
+                i += 1
+                print i, d
+                if i >= 9:
+                    try:
+                        self.db.fav.delete_one({'_id': ObjectId(d['_id'])})
+                    except:
+                        if DEBUG: traceback.print_exc()
 
     def insertFavorite(self, danmaku, name):
         if self.db:
             favs = self.selectFavorite(danmaku)
             if DEBUG: print favs
-            if len(favs) == 9:
-                self.removeFavorite(fav[0])
+            if len(favs) >= 9:
+                self.removeFavorite(danmaku, name)
 
             self.db.fav.insert_one({
                 'user':danmaku.user,
