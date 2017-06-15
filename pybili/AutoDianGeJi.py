@@ -26,11 +26,17 @@ DIVIDER = '--------------------'
 
 class Music(object):
 
-    def __init__(self, n, s, e): self.name, sname, ename = n, s, e
-    def __str__(self): return self.searchKey()
-    def __repr__(self): return self.__str__()
+    def __init__(self, n, s, e): 
+        self.name, self.sname, self.ename = n, s, e
 
-    def searchKey(self): return '%s %s %s' % (self.name, self.sname, self.ename)
+    def __str__(self): 
+        return self.searchKey()
+
+    def __repr__(self): 
+        return self.__str__()
+    
+    def searchKey(self): 
+        return '%s %s %s' % (self.name, self.sname, self.ename)
 
 class DBHelper(object):
 
@@ -86,7 +92,9 @@ class DanmakuHandler(bili.SimpleDanmakuHandler):
         thread.start_new_thread(self.musicThread, ())
         self.db = DBHelper()
 
-    def clear(self): print("\033c"); if self.p.filename: print '正在播放: ', self.p.filename[:-4]
+    def clear(self): 
+        print("\033c")
+        if self.p.filename: print '正在播放: ', self.p.filename[:-4]
 
     def printHelp(self): print('发 \'点歌\' 进入 点歌模式，在点歌模式下发 \'搜索 关键字\' 搜索列表，在点歌模式下发送 \'点歌 ID\' 完成点歌。发送 \'退出\' 结束点歌。请在五分钟内完成全部操作哦～')
 
@@ -225,7 +233,7 @@ class DanmakuHandler(bili.SimpleDanmakuHandler):
                             i = int(content[6:].strip())
                             to_add = self.all_music[i-1].name
                         self.db.insertFavorite(danmaku, to_add)
-                        self.sender.sendDanmaku(self.roomid, '%s, [%s...]收藏成功' % (user, to_add[:15]))
+                        self.sender.sendDanmaku(self.roomid, '[%s...]收藏成功' % to_add[:15])
                     except Exception, e:
                         if DEBUG: traceback.print_exc()
                         self.sender.sendDanmaku(self.roomid, '请输入正确的指令哦')
@@ -261,7 +269,7 @@ class DanmakuHandler(bili.SimpleDanmakuHandler):
                         if k[0] == '@': # play from favorite
                             i = int(k[1:])
                             favs = self.db.selectFavorite(danmaku)
-                            self.addToPlayListByName(favs[i])
+                            self.addToPlayListByName(favs[i-1])
                         else:
                             i = int(k)
                             self.addToPlayList(i)
