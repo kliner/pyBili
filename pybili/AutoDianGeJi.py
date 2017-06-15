@@ -14,35 +14,61 @@ import random
 import threading
 import subprocess
 
+import traceback
+import pymongo
+from pymongo import MongoClient
+
 reload(sys)  
 sys.setdefaultencoding('utf8')
 
 DEBUG = 0
+DIVIDER = '--------------------'
 
 class Music(object):
 
-    def __init__(self, s):
-        self.name = s
-        self.sname = s
-        self.ename = s
+    def __init__(self, n, s, e): self.name, sname, ename = n, s, e
+    def __str__(self): return self.searchKey()
+    def __repr__(self): return self.__str__()
 
-    def __init__(self, n, s, e):
-        self.name = n
-        self.sname = s
-        self.ename = e
+    def searchKey(self): return '%s %s %s' % (self.name, self.sname, self.ename)
 
-    def __str__(self):
-        return self.searchKey()
+class DBHelper(object):
 
-    def __repr__(self):
-        return self.__str__()
+    def __init__(self):
+        try:
+            print 'start db...'
+            self.client = MongoClient()
+            self.db = self.client.music
+        except:
+            print 'mongodb service down!\nto install:[brew install mongodb]\nto start:[brew services start mongodb]'
+            self.db = None
 
-    def searchKey(self):
-        return '%s %s %s' % (self.name, self.sname, self.ename)
+    def selectFavorite(self, danmaku):
+        if self.db:
+            cursor = self.db.fav.find({'user': danmaku.user}).sort([('time', pymongo.ASCENDING)])
+            return [d['name'] for d in cursor]
 
-class DanmakuHandler(bili.DanmakuHandler):
-    
-    lib_path = '/Users/kliner/Music/lib/'
+    def removeFavorite(self, danmaku, name):
+        if self.db:
+            self.db.fav.delete_one({'user': danmaku.user, 'name':name})
+
+    def insertFavorite(self, danmaku, name):
+        if self.db:
+            favs = self.selectFavorite(danmaku)
+            if DEBUG: print favs
+            if len(favs) == 9:
+                self.removeFavorite(fav[0])
+
+            self.db.fav.insert_one({
+                'user':danmaku.user,
+                'name':name,
+                'time':time.strftime('%y%m%d-%H%M%S', danmaku.time)
+                })
+            return self.selectFavorite(danmaku)
+
+class DanmakuHandler(bili.SimpleDanmakuHandler):
+    home_path = os.path.expanduser("~")
+    lib_path = home_path + '/Music/lib/'
     all_music = []
     to_play_lst = []
     p = mplayer.Player()
@@ -58,14 +84,11 @@ class DanmakuHandler(bili.DanmakuHandler):
         self.roomid = roomid
         self.loadMusic()
         thread.start_new_thread(self.musicThread, ())
+        self.db = DBHelper()
 
-    def clear(self): 
-        print("\033c")
-        if self.p.filename: 
-            print '正在播放: ', self.p.filename[:-4]
+    def clear(self): print("\033c"); if self.p.filename: print '正在播放: ', self.p.filename[:-4]
 
-    def printHelp(self):
-        print('发 \'点歌\' 进入 点歌模式，在点歌模式下发 \'搜索 关键字\' 搜索列表，在点歌模式下发送 \'点歌 ID\' 完成点歌。发送 \'退出\' 结束点歌。请在五分钟内完成全部操作哦～')
+    def printHelp(self): print('发 \'点歌\' 进入 点歌模式，在点歌模式下发 \'搜索 关键字\' 搜索列表，在点歌模式下发送 \'点歌 ID\' 完成点歌。发送 \'退出\' 结束点歌。请在五分钟内完成全部操作哦～')
 
     def printToPlay(self):
         print '当前待播放列表：'
@@ -73,12 +96,12 @@ class DanmakuHandler(bili.DanmakuHandler):
 
     def loadMusic(self):
         origin_music = [f[:-4] for f in os.listdir(self.lib_path) if f[-4:] == '.mp3']
-        with open('ti', 'w') as f:
+        with open('%s/.pybili.ti' % self.home_path, 'w') as f:
             f.write('\n'.join(origin_music))
         
-        subprocess.Popen('opencc -i ti -o to -c t2s.json', shell=True)
+        subprocess.Popen('opencc -i %s/.pybili.ti -o %s/.pybili.to -c t2s.json' % (self.home_path, self.home_path), shell=True)
 
-        with open('to', 'r') as f:
+        with open('%s/.pybili.to' % self.home_path, 'r') as f:
             lst = f.read().split('\n')
             self.all_music = [Music(n,s,n) for n, s in zip(origin_music, lst)]
            
@@ -154,9 +177,8 @@ class DanmakuHandler(bili.DanmakuHandler):
                 print '%d\t: %s' % (i, t)
             print '切歌时候会导致搜索结果丢失，请注意重新搜索哦'
         
-    def addToPlayList(self, i):
-        to_add = self.all_music[i-1]
-        if DEBUG: print self.cur_user, i, to_add 
+    def addToPlayListByName(self, name):
+        to_add = Music(name, name, name)
         self.LOCK.acquire()
         if len(self.to_play_lst) < 10:
             if not any([1 for _, music in self.to_play_lst if music.name == to_add.name]):
@@ -166,7 +188,19 @@ class DanmakuHandler(bili.DanmakuHandler):
         self.printToPlay()
         self.sender.sendDanmaku(self.roomid, '[%s...]点歌成功' % to_add.name[:15])
 
+    def addToPlayList(self, i):
+        to_add = self.all_music[i-1]
+        self.addToPlayListByName(to_add.name)
+
+    def printFav(self, danmaku):
+        print DIVIDER
+        print '%s的收藏列表: ' % danmaku.user
+        favs = self.db.selectFavorite(danmaku)
+        for i, name in enumerate(favs):
+            print '%d, %s' % (i+1, name)
+
     def handleDanmaku(self, danmaku):
+        super(DanmakuHandler, self).handleDanmaku(danmaku)
         body = danmaku.rawData
         if danmaku.action == 5:
             raw = json.loads(body)
@@ -179,7 +213,23 @@ class DanmakuHandler(bili.DanmakuHandler):
                 if manager and content in ['切歌']:
                     self.skip = True
 
-                if content in ['点歌', '點歌']: 
+                if content in ['查看收藏','收藏列表']:
+                    if (not self.cur_user) or (self.cur_user == user):
+                        self.clear()
+                        self.printToPlay()
+                        self.printFav(danmaku)
+                elif content[:6] in ['收藏']:
+                    try:
+                        if len(content) == 6: to_add = self.p.filename[:-4]
+                        else: 
+                            i = int(content[6:].strip())
+                            to_add = self.all_music[i-1].name
+                        self.db.insertFavorite(danmaku, to_add)
+                        self.sender.sendDanmaku(self.roomid, '%s, [%s...]收藏成功' % (user, to_add[:15]))
+                    except Exception, e:
+                        if DEBUG: traceback.print_exc()
+                        self.sender.sendDanmaku(self.roomid, '请输入正确的指令哦')
+                elif content in ['点歌', '點歌']: 
                     if not self.cur_user:
                         self.cur_user = user
                         self.printHelp()
@@ -206,9 +256,15 @@ class DanmakuHandler(bili.DanmakuHandler):
                     key = content[6:].strip().lower()
                     self.search(key)
                 elif user == self.cur_user and content[:6] in ['点歌', '點歌']: 
+                    k = content[6:].strip()
                     try:
-                        i = int(content[6:].strip())
-                        self.addToPlayList(i)
+                        if k[0] == '@': # play from favorite
+                            i = int(k[1:])
+                            favs = self.db.selectFavorite(danmaku)
+                            self.addToPlayListByName(favs[i])
+                        else:
+                            i = int(k)
+                            self.addToPlayList(i)
                     except Exception, e:
                         if DEBUG: print e
                         self.sender.sendDanmaku(self.roomid, '请输入正确的点歌指令哦')
