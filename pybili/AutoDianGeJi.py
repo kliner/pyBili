@@ -61,7 +61,6 @@ class DBHelper(object):
             i = 0
             for d in cursor:
                 i += 1
-                print i, d
                 if i >= 9:
                     try:
                         self.db.fav.delete_one({'_id': ObjectId(d['_id'])})
@@ -247,7 +246,7 @@ class DanmakuHandler(bili.SimpleDanmakuHandler):
                     except Exception, e:
                         if DEBUG: traceback.print_exc()
                         self.sender.sendDanmaku(self.roomid, '请输入正确的指令哦')
-                elif content in ['点歌', '點歌']: 
+                elif content[:6] in ['点歌', '點歌']: 
                     if not self.cur_user:
                         self.cur_user = user
                         self.printHelp()
@@ -255,37 +254,26 @@ class DanmakuHandler(bili.SimpleDanmakuHandler):
                         self.timer = threading.Timer(300, self.localTimerThread, (user, ))
                         self.timer.start()
                         self.sender.sendDanmaku(self.roomid, '%s开始点歌～' % self.cur_user)
+                    if self.cur_user == user:
+                        k = content[6:].strip()
+                        if not k: return
+                        try:
+                            if k[0] == '@': # play from favorite
+                                i = int(k[1:])
+                                favs = self.db.selectFavorite(danmaku)
+                                self.addToPlayListByName(favs[i-1])
+                            else:
+                                if k.isdigit(): self.addToPlayList(int(k)) # play by id
+                                else: self.search(k.lower()) # search
+                        except Exception, e:
+                            if DEBUG: print e
+                            self.sender.sendDanmaku(self.roomid, '请输入正确的点歌指令哦')
                     else:
                         self.sender.sendDanmaku(self.roomid, '%s正在点歌, 请等一下哦' % self.cur_user)
-                elif not self.cur_user and content[:6] in ['点歌', '點歌']: 
-                    k = content[6:]
-                    if k[0] != ' ': return
-                    self.cur_user = user
-                    key = content[6:].strip().lower()
-                    self.clear()
-                    self.printHelp()
-                    print '当前操作者：' + user
-                    self.timer = threading.Timer(300, self.localTimerThread, (user, ))
-                    self.timer.start()
-                    self.sender.sendDanmaku(self.roomid, '%s开始点歌～' % self.cur_user)
-                    self.search(key)
                 elif user == self.cur_user and content[:6] in ['搜索']:
                     self.clear()
                     key = content[6:].strip().lower()
                     self.search(key)
-                elif user == self.cur_user and content[:6] in ['点歌', '點歌']: 
-                    k = content[6:].strip()
-                    try:
-                        if k[0] == '@': # play from favorite
-                            i = int(k[1:])
-                            favs = self.db.selectFavorite(danmaku)
-                            self.addToPlayListByName(favs[i-1])
-                        else:
-                            i = int(k)
-                            self.addToPlayList(i)
-                    except Exception, e:
-                        if DEBUG: print e
-                        self.sender.sendDanmaku(self.roomid, '请输入正确的点歌指令哦')
                 elif user == self.cur_user and content.lower() in ['退出', 'exit', '结束', 'quit']: 
                     self.sender.sendDanmaku(self.roomid, '欢迎再来点歌哦～')
                     self.cur_user = None
