@@ -3,8 +3,11 @@ import sys
 import Tkinter as tk       
 import DanMuJi
 import bili
+import re
+import emoji_list
 
 DEBUG = 0
+HEIGHT = 10
 
 class Application(tk.Frame):              
     def __init__(self, master=None):
@@ -13,7 +16,7 @@ class Application(tk.Frame):
         self.createWidgets()
 
     def createWidgets(self):
-        self.w = tk.Text(self, height=10)
+        self.w = tk.Text(self, height=HEIGHT)
         self.w.pack(expand=tk.YES, fill=tk.BOTH)
         self.w.grid()
 
@@ -25,11 +28,22 @@ class GUIDanmakuHandler(bili.SimpleDanmakuHandler):
 
     def __init__(self, w):
         self.w = w
+        self.cnt = 0
+        self.all_emoji = emoji_list.all_emoji
+
+    def stripEmoji(self, s):
+        for e in self.all_emoji:
+            if e not in '0123456789#*': s = s.replace(e, '')
+        return s
 
     def handleDanmaku(self, danmaku):
         super(GUIDanmakuHandler, self).handleDanmaku(danmaku)
         if hasattr(danmaku, 'user') & hasattr(danmaku, 'text'):
-            self.w.insert(tk.END, '%s : %s\n' % (danmaku.user, danmaku.text)) 
+            if self.cnt > HEIGHT * 10: self.w.delete(1.0, 2.0)
+            else: self.cnt += 1
+            user = self.stripEmoji(danmaku.user)
+            text = self.stripEmoji(danmaku.text)
+            if text and user: self.w.insert(tk.END, '%s : %s\n' % (user, text)) 
             self.w.see(tk.END)
 
 def main():

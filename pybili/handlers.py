@@ -65,6 +65,7 @@ class TTSHandler(SimpleDanmakuHandler):
     def say(self, s):
         t = re.sub(r'23[3]+', ' 2 3 3 ', s)
         t = re.sub(r'66[6]+', ' 6 6 6 ', t)
+        t = re.sub(r'hh[h]+', ' 哈哈哈 ', t)
         cmd = 'say \'%s\'' % (t)
         if DEBUG: print cmd
         self.tts_s = subprocess.Popen(cmd, shell=True)
