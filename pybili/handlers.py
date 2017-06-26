@@ -66,6 +66,10 @@ class TTSHandler(SimpleDanmakuHandler):
         t = re.sub(r'23[3]+', ' 2 3 3 ', s)
         t = re.sub(r'66[6]+', ' 6 6 6 ', t)
         t = re.sub(r'hh[h]+', ' 哈哈哈 ', t)
+        t = t.replace('(°∀°)ﾉ', '挥手')
+        t = t.replace('(╯‵□′)╯︵┻━┻', '掀桌')
+        t = t.replace('°', ' ')
+        t = t.replace('-', ' ')
         cmd = 'say \'%s\'' % (t)
         if DEBUG: print cmd
         self.tts_s = subprocess.Popen(cmd, shell=True)
@@ -99,6 +103,7 @@ class NotifcationHandler(SimpleDanmakuHandler):
     def showMacNotification(self, title, content):
         title = title.replace('\'', ' ')
         content = content.replace('\'', ' ')
+        content = content.replace('-', ' ')
         cmd = "terminal-notifier -title '%s' -message '%s' -group '%s' > /dev/null" % (title, content, title)
         subprocess.Popen(cmd, shell=True)
         t = threading.Timer(10, self.closeMacNotification, (title, ))
