@@ -45,6 +45,7 @@ class SimpleDanmakuHandler(DanmakuHandler):
                 user, content = info[2][1].encode('utf-8'), info[1].encode('utf-8')
                 danmaku.user = user
                 danmaku.text = content
+                danmaku.isManager = info[2][2]
 
 class BiliHelper(object):
 

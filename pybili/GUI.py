@@ -7,7 +7,7 @@ import re
 import emoji_list
 
 DEBUG = 0
-HEIGHT = 10
+HEIGHT = 32
 
 class Application(tk.Frame):              
     def __init__(self, master=None):
@@ -16,7 +16,7 @@ class Application(tk.Frame):
         self.createWidgets()
 
     def createWidgets(self):
-        self.w = tk.Text(self, height=HEIGHT)
+        self.w = tk.Text(self, height=HEIGHT, font=("simhei", 20))
         self.w.pack(expand=tk.YES, fill=tk.BOTH)
         self.w.grid()
 

@@ -18,6 +18,7 @@ class Config(object):
         self.read(path)
 
     def get(self, dataid, key, value = None):
+        if not str(dataid) in self.data: return value
         d = self.data[str(dataid)]
         v = d.get(key, None)
         if not v: return value

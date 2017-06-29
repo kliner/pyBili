@@ -104,6 +104,7 @@ class NotifcationHandler(SimpleDanmakuHandler):
         title = title.replace('\'', ' ')
         content = content.replace('\'', ' ')
         content = content.replace('-', ' ')
+        content = content.replace('(T_T)', '小哭脸')
         cmd = "terminal-notifier -title '%s' -message '%s' -group '%s' > /dev/null" % (title, content, title)
         subprocess.Popen(cmd, shell=True)
         t = threading.Timer(10, self.closeMacNotification, (title, ))
