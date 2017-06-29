@@ -5,24 +5,25 @@ import DanMuJi
 import bili
 import re
 import emoji_list
+import bili_config
 
 DEBUG = 0
-HEIGHT = 32
 
-class Application(tk.Frame):              
-    def __init__(self, master=None):
+class Application(tk.Frame):
+    def __init__(self, master=None, w=40, h=32):
         tk.Frame.__init__(self, master)   
-        self.grid()                       
+        
+        self.mWIDTH, self.mHEIGHT = w, h
+        self.grid()
         self.createWidgets()
 
     def createWidgets(self):
-        self.w = tk.Text(self, height=HEIGHT, font=("simhei", 20))
-        self.w.pack(expand=tk.YES, fill=tk.BOTH)
-        self.w.grid()
+        self.w = tk.Text(self, height=self.mHEIGHT, width=self.mWIDTH, font=("simhei", 20))
+        #self.w.pack(expand=tk.YES, fill=tk.BOTH)
+        self.w.grid(row=0, column=0, sticky='nsew')
 
-        self.quitButton = tk.Button(self, text='Quit',
-            command=self.quit)            
-        self.quitButton.grid()            
+        self.quitButton = tk.Button(self, text='Quit', command=self.quit)            
+        self.quitButton.grid(row=1, column=0)
 
 class GUIDanmakuHandler(bili.SimpleDanmakuHandler):
 
@@ -50,8 +51,10 @@ def main():
     argv = sys.argv
     roomid = 90012
     if len(argv) == 2: roomid = int(argv[1])
-
-    app = Application()                      
+    c = bili_config.Config()
+    print 'width:', c.w, 'height', c.h
+    
+    app = Application(w=c.w, h=c.h)
     danmakuHandlers = DanMuJi.initHandlers(roomid) + [GUIDanmakuHandler(app.w)]
     bili.BiliHelper(roomid, *danmakuHandlers)
     app.master.title('bilibili danmaku helper')

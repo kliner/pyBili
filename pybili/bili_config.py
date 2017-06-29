@@ -4,6 +4,9 @@ import os.path
 import sys
 import ConfigParser
 
+DEFAULT_WIDTH = 40
+DEFAULT_HEIGHT = 32
+
 class Config(object):
 
     data = {}
@@ -24,20 +27,22 @@ class Config(object):
         if not v: return value
         return v
 
-    def _get(self, cf, sec, opt):
+    def _get(self, cf, sec, opt, value = None):
         if cf.has_option(sec, opt): return cf.get(sec, opt)
-        else: return
+        else: return value
 
-    def _getboolean(self, cf, sec, opt):
+    def _getboolean(self, cf, sec, opt, value = None):
         if cf.has_option(sec, opt): return cf.getboolean(sec, opt)
-        else: return
+        else: return value
     
     def read(self, path):
         cf = ConfigParser.ConfigParser(allow_no_value=1)
         cf.read(path)
         
         for section in cf.sections():
-            if section == 'cookies':
+            if section == 'GUI':
+                self.w, self.h = cf.get(section, 'width', DEFAULT_WIDTH), cf.get(section, 'height', DEFAULT_HEIGHT)
+            elif section == 'cookies':
                 s = cf.get(section, 'cookies')
                 if 'cookie:' == s[:7]: s = s[7:] # do strip 
                 try:
@@ -63,6 +68,8 @@ class Config(object):
 
     def p(self):
         print 'current configs:'
+        print '----------'
+        print 'GUI width, height:', self.w, self.h
         for k in self.data.keys():
             print '----------'
             print k
@@ -81,6 +88,17 @@ class Config(object):
         if cookies:
             if not cf.has_section('cookies'): cf.add_section('cookies')
             cf.set('cookies', 'cookies', cookies)
+
+        w = raw_input('Please input the GUI width(current=%s): [press enter to skip]' % str(self._get(cf, 'GUI', 'width', value=DEFAULT_WIDTH)))
+        if w:
+            if not cf.has_section('GUI'): cf.add_section('GUI')
+            cf.set('GUI', 'width', int(w))
+
+        h = raw_input('Please input the GUI height(current=%s): [press enter to skip]' % str(self._get(cf, 'GUI', 'height', value=DEFAULT_HEIGHT)))
+        if h:
+            if not cf.has_section('GUI'): cf.add_section('GUI')
+            cf.set('GUI', 'height', int(h))
+        
 
         roomid = raw_input('Please input the roomid to setup: [press enter to skip]')
         if roomid:
