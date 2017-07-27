@@ -9,6 +9,53 @@ DEFAULT_HEIGHT = 32
 
 class Config(object):
 
+    options = [
+            {
+                'k':'GiftResponse',
+                'v':False,
+                'desc':'auto-response the gift'
+            },
+            {
+                'k':'ShowTime',
+                'v':False,
+                'desc':'show the sent time of the danmaku'
+            },
+            {
+                'k':'SmallTVHint',
+                'v':False,
+                'desc':'auto send a danmaku when received the SmallTV'
+            },
+            {
+                'k':'MacNotification',
+                'v':False,
+                'desc':'show notification in Mac OS'
+            },
+            {
+                'k':'MacTTS',
+                'v':False,
+                'desc':'speak the danmaku out in Mac OS'
+            },
+            {
+                'k':'DanmakuColor',
+                'v':'white',
+                'desc':'danmaku color'
+            },
+            {
+                'k':'RecordDanmaku',
+                'v':False,
+                'desc':'record the danmaku into MongoDB'
+            },
+            {
+                'k':'AwardSmallTV',
+                'v':False,
+                'desc':'auto get award from the SmallTV'
+            },
+            {
+                'k':'AwardSummer',
+                'v':False,
+                'desc':'auto get award from the summer activity'
+            },
+            ]
     data = {}
     cookies = {}
 
@@ -36,6 +83,7 @@ class Config(object):
         else: return value
     
     def read(self, path):
+        self.w, self.h = DEFAULT_WIDTH, DEFAULT_HEIGHT
         cf = ConfigParser.ConfigParser(allow_no_value=1)
         cf.read(path)
         
@@ -54,14 +102,11 @@ class Config(object):
             else:
                 try:
                     d = {}
-                    d['GiftResponse'] = self._getboolean(cf, section, 'GiftResponse')
-                    d['ShowTime'] = self._getboolean(cf, section, 'ShowTime')
-                    d['SmallTVHint'] = self._getboolean(cf, section, 'SmallTVHint')
-                    d['MacNotification'] = self._getboolean(cf, section, 'MacNotification')
-                    d['MacTTS'] = self._getboolean(cf, section, 'MacTTS')
-                    d['DanmakuColor'] = self._get(cf, section, 'DanmakuColor')
-                    d['AwardSmallTV'] = self._getboolean(cf, section, 'AwardSmallTV')
-                    d['RecordDanmaku'] = self._getboolean(cf, section, 'RecordDanmaku')
+                    for opt in self.options:
+                        if type(opt['v']) == bool:
+                            d[opt['k']] = self._getboolean(cf, section, opt['k'])
+                        else:
+                            d[opt['k']] = self._get(cf, section, opt['k'])
                     self.data[section] = d
                 except Exception, e:
                     print 'exception when read config, please check the format of config file ', e
@@ -104,21 +149,12 @@ class Config(object):
         if roomid:
             if not cf.has_section(roomid): cf.add_section(roomid)
 
-            b = self.inputBoolean('Auto-response the gift? [y/n]')
-            cf.set(roomid, 'GiftResponse', b)
-            b = self.inputBoolean('Show the time of the danmaku in console? [y/n]')
-            cf.set(roomid, 'ShowTime', b)
-            b = self.inputBoolean('Auto-response the smallTV? [y/n]')
-            cf.set(roomid, 'SmallTVHint', b)
-            b = self.inputBoolean('Auto-enter the lottery of the smallTV? [y/n]')
-            cf.set(roomid, 'AwardSmallTV', b)
-            b = self.inputBoolean('Show notification in the Mac OS? [y/n]')
-            cf.set(roomid, 'MacNotification', b)
-            b = self.inputBoolean('Speak the danmaku out in the Mac OS? [y/n]')
-            cf.set(roomid, 'MacTTS', b)
-            b = self.inputBoolean('Record the danmaku into the MongoDB? [y/n]')
-            cf.set(roomid, 'RecordDanmaku', b)
-            cf.set(roomid, 'DanmakuColor', raw_input('Danmaku color? [white/red/orange/yellow/green/cyan/blue/purple]'))
+            for opt in self.options:
+                if type(opt['v']) == bool:
+                    b = self.inputBoolean('%s? [y/n]' % opt['desc'])
+                    cf.set(roomid, opt['k'], b)
+                else:
+                    cf.set(roomid, opt['k'], raw_input('%s?' % opt['desc']))
         cf.write(open(self.path, 'w'))
 
 def main():

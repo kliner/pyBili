@@ -7,6 +7,7 @@ import json
 import thread
 import time
 import sys
+import pybili
 
 reload(sys)  
 sys.setdefaultencoding('utf-8')
@@ -49,10 +50,15 @@ class SimpleDanmakuHandler(DanmakuHandler):
 
 class BiliHelper(object):
 
+    def printVersion(self):
+        s = '| bili danmaku helper v%s |' % pybili.__version__
+        print '-' * len(s)
+        print s
+        print '-' * len(s)
+
     def __init__(self, roomid, *packetHandlers):
-        print '----------------------------'
-        print '| bili danmaku helper v0.2 |' 
-        print '----------------------------'
+        
+        self.printVersion()
         self.lastPacket = 0
         self.roomid = roomid
         self.danmakuHandlers = packetHandlers

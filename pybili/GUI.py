@@ -40,7 +40,7 @@ class GUIDanmakuHandler(bili.SimpleDanmakuHandler):
     def handleDanmaku(self, danmaku):
         super(GUIDanmakuHandler, self).handleDanmaku(danmaku)
         if hasattr(danmaku, 'user') & hasattr(danmaku, 'text'):
-            if self.cnt > HEIGHT * 10: self.w.delete(1.0, 2.0)
+            if self.cnt > 100: self.w.delete(1.0, 2.0)
             else: self.cnt += 1
             user = self.stripEmoji(danmaku.user)
             text = self.stripEmoji(danmaku.text)
