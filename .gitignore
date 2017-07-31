@@ -13,5 +13,7 @@ dist
 build
 
 # other
+test*.py
 .pypirc
 MANIFEST
+*.log

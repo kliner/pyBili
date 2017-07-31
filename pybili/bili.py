@@ -8,6 +8,7 @@ import thread
 import time
 import sys
 import pybili
+import logging
 
 reload(sys)  
 sys.setdefaultencoding('utf-8')
@@ -15,6 +16,7 @@ sys.setdefaultencoding('utf-8')
 HOST = 'livecmt-2.bilibili.com'
 PORT = 788
 BUFFER_SIZE = 128 * 1024
+logging.basicConfig(filename='bili.log', level=logging.DEBUG)
 
 DEBUG = 0
 
