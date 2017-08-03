@@ -138,7 +138,7 @@ class DanmakuHandler(bili.SimpleDanmakuHandler):
         if self.cur_user: print '当前操作者：', self.cur_user
         self.printToPlay()
 
-        self.p.volume = 8
+        self.p.volume = 20
         length = self.p.length
         self.p.pause()
         if DEBUG: print length

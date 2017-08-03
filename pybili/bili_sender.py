@@ -37,41 +37,44 @@ class Sender(object):
         self.raffleIds = set()
 
     def _get(self, url, params):
-        r = requests.get(url, params=params, cookies=self.cookies)
-        result = r.content
-        raw = json.loads(result)
-        if raw['code'] != 0: 
-            self.logger.debug(raw)
-            self.logger.warn(raw['msg'])
-        else: return raw
+        try:
+            r = requests.get(url, params=params, cookies=self.cookies)
+            result = r.content
+            raw = json.loads(result)
+            if raw['code'] != 0: 
+                self.logger.debug(raw)
+                self.logger.warn(raw['msg'])
+            else: return raw
+        except:
+            pass
 
     def _post(self, url, params):
-        r = requests.post(url, data=params, cookies=self.cookies)
-        result = r.content
-        raw = json.loads(result)
-        if raw['code'] != 0: 
-            self.logger.debug(raw)
-            self.logger.warn(raw['msg'])
-        else: return raw
+        try:
+            r = requests.post(url, data=params, cookies=self.cookies)
+            result = r.content
+            raw = json.loads(result)
+            if raw['code'] != 0: 
+                self.logger.debug(raw)
+                self.logger.warn(raw['msg'])
+            else: return raw
+        except:
+            pass
 
     def sendDanmaku(self, roomid, content, color='white'):
-        try:
-            content = content.strip()
-            if not content: return
-            if color == 'blue': color = 6737151
-            elif color == 'green': color = 8322816
-            else: color = 16777215 # white
-            params = {
-                "color":color, 
-                "fontsize":25,
-                "mode":1,
-                "msg":content,
-                "rnd":int(time.time()),
-                "roomid":roomid
-                }
-            return self._post(SEND_URL, params)
-        except:
-            return False
+        content = content.strip()
+        if not content: return
+        if color == 'blue': color = 6737151
+        elif color == 'green': color = 8322816
+        else: color = 16777215 # white
+        params = {
+            "color":color, 
+            "fontsize":25,
+            "mode":1,
+            "msg":content,
+            "rnd":int(time.time()),
+            "roomid":roomid
+            }
+        return self._post(SEND_URL, params)
 
     def joinSmallTV(self, roomid, tv_id):
         params = {
