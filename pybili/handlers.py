@@ -7,11 +7,43 @@ import threading
 import subprocess
 import re
 
+import pika
+
 from bili import DanmakuHandler
 from bili import SimpleDanmakuHandler
 from pymongo import MongoClient
 
 DEBUG = 0
+
+class RabbitMQHandler(SimpleDanmakuHandler):
+
+    def __init__(self):
+        try:
+            print 'start RabbitMQ publisher...'
+            connection = pika.BlockingConnection()
+            self.client = connection.channel()
+        except:
+            print 'RabbitMQ service down!\nto install:[brew install rabbitmq]\nto start:[brew services start rabbitmq]'
+
+    def sendMsg(self, text):
+        try:
+            self.client.basic_publish(exchange='', routing_key='bilidm', body=text)
+        except:
+            if DEBUG: print 'mq reconnect'
+            connection = pika.BlockingConnection()
+            self.client = connection.channel()
+            self.client.basic_publish(exchange='', routing_key='bilidm', body=text)
+
+    def handleDanmaku(self, danmaku):
+        super(RabbitMQHandler, self).handleDanmaku(danmaku)
+        
+        if hasattr(danmaku, 'user') and hasattr(danmaku, 'text'): 
+            s = json.dumps({
+                'user':danmaku.user,
+                'text':danmaku.text
+                })
+            if DEBUG: print 'sending mq msg, ', s
+            self.sendMsg(s)
 
 class MongoHandler(DanmakuHandler):
 

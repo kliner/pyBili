@@ -13,7 +13,7 @@ setup(
   keywords = ['bili', 'live', 'danmaku'], # arbitrary keywords
   classifiers = [],
 
-  install_requires=['requests', 'pymongo', 'emoji_list'],
+  install_requires=['requests', 'pymongo', 'emoji_list', 'pika'],
 
   entry_points={
     'console_scripts':[

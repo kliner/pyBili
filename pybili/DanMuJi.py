@@ -72,6 +72,7 @@ def initHandlers(roomid):
     sender = bili_sender.Sender(cookies)
 
     danmakuHandlers = [handler]
+    if config.get(roomid, "RabbitMQApi", False): danmakuHandlers += [RabbitMQHandler()]
     if config.get(roomid, "RecordDanmaku", False): danmakuHandlers += [MongoHandler()]
     if config.get(roomid, "MacTTS", False): danmakuHandlers += [TTSHandler()]
     if config.get(roomid, "MacNotification", False): danmakuHandlers += [NotifcationHandler()]

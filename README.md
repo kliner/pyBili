@@ -11,7 +11,7 @@ This is a python live.bilibili.com helper library.
 
 # Install
 
-`$ sudo pip install pybili`
+`$ pip install pybili`
 
 # Usage
 
@@ -57,6 +57,22 @@ This is a python live.bilibili.com helper library.
     Install the MongoDB through
 
     `$ brew install mongodb` [more](https://docs.mongodb.com/master/tutorial/install-mongodb-on-os-x/)
+
+4. How to use the web-interface?
+
+    1. Install RabbitMQ(connection between this project and the Live-Stream-Chat-Retriever project:
+
+        `$ brew install rabbitmq` [more](https://www.rabbitmq.com/#getstarted/)
+
+    2. Setup aonther project from [https://github.com/kliner/Live-Stream-Chat-Retriever](https://github.com/kliner/Live-Stream-Chat-Retriever), or using:
+
+        `$ npm install https://github.com/kliner/Live-Stream-Chat-Retriever/archive/0.1.0.tar.gz`
+
+    3. Using 2 shells to run 
+
+        `$ bili-dm roomId`
+
+        `$ npm start PATH_TO_{Live-Stream-Chat-Retriever}`
 
 # License (MIT)
 

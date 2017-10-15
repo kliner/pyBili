@@ -11,6 +11,11 @@ class Config(object):
 
     options = [
             {
+                'k':'RabbitMQApi',
+                'v':False,
+                'desc':'send danmaku to RabbitMQ(routing_key=bilimq)'
+            },
+            {
                 'k':'GiftResponse',
                 'v':False,
                 'desc':'auto-response the gift'
