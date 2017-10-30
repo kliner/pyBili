@@ -44,6 +44,8 @@ class RabbitMQHandler(SimpleDanmakuHandler):
                 })
             if DEBUG: print 'sending mq msg, ', s
             self.sendMsg(s)
+        else:
+            self.sendMsg('heartBeat')
 
 class MongoHandler(DanmakuHandler):
 

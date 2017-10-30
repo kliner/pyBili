@@ -112,6 +112,8 @@ class BiliHelper(object):
         try:
             while 1:
                 self.sendPacket(2, '')
+                danmaku = Danmaku('heartBeat', '', time.localtime(time.time()))
+                for handler in self.danmakuHandlers: handler.handleDanmaku(danmaku)
                 time.sleep(30)
         except Exception, e:
             if DEBUG: print 'heartBeatThread down!'
