@@ -56,9 +56,9 @@ class Config(object):
                 'desc':'auto get award from the SmallTV'
             },
             {
-                'k':'AwardSummer',
+                'k':'AwardRaffle',
                 'v':False,
-                'desc':'auto get award from the summer activity'
+                'desc':'auto get award from the raffle activity'
             },
             ]
     data = {}

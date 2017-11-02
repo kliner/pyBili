@@ -79,7 +79,7 @@ def initHandlers(roomid):
     if config.get(roomid, "GiftResponse", False): danmakuHandlers += [GiftResponseHandler(sender)]
     if config.get(roomid, "AwardSmallTV", False): danmakuHandlers += [AutoRewardHandler(sender)]
     if config.get(roomid, "SmallTVHint", False): danmakuHandlers += [RewardResponseHandler(sender)]
-    if config.get(roomid, "AwardSummer", False): danmakuHandlers += [AutoSummerRewardHandler(sender)]
+    if config.get(roomid, "AwardRaffle", False): danmakuHandlers += [AutoRaffleRewardHandler(sender)]
     return danmakuHandlers
 
 def main():

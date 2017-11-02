@@ -10,8 +10,8 @@ import logging.handlers
 
 SEND_URL = 'http://live.bilibili.com/msg/send'
 TV_URL = 'http://api.live.bilibili.com/SmallTV/join'
-QUERY_SUMMER_URL = 'http://api.live.bilibili.com/activity/v1/SummerBattle/check'
-SUMMER_URL = 'http://api.live.bilibili.com/activity/v1/SummerBattle/join'
+QUERY_RAFFLE_URL = 'http://api.live.bilibili.com/activity/v1/Raffle/check'
+RAFFLE_URL = 'http://api.live.bilibili.com/activity/v1/Raffle/join'
 
 class Sender(object):
 
@@ -84,30 +84,30 @@ class Sender(object):
                 }
         self._get(TV_URL, params)
 
-    def _joinSummer(self, roomid, raffleId):
+    def _joinRaffle(self, roomid, raffleId):
         params = {
                 'roomid':roomid,
                 'raffleId':raffleId
                 }
-        r = self._post(SUMMER_URL, params)
+        r = self._post(RAFFLE_URL, params)
         if r: self.logger.debug('join summer: %s' % r['msg'])
 
-    def joinSummer(self, roomid, giftId):
+    def joinRaffle(self, roomid, giftId):
         params = {
                 'roomid':roomid
                 }
-        r = self._get(QUERY_SUMMER_URL, params)
+        r = self._get(QUERY_RAFFLE_URL, params)
         if r:
             for d in r['data']:
                 raffleId = d['raffleId']
                 if raffleId not in self.raffleIds:
-                    self._joinSummer(roomid, raffleId)
+                    self._joinRaffle(roomid, raffleId)
                     self.raffleIds.add(raffleId)
-                    thread.start_new_thread(self.checkSummer, (roomid, raffleId))
+                    thread.start_new_thread(self.checkRaffle, (roomid, raffleId))
 
-    def checkSummer(self, roomid, raffleId):
+    def checkRaffle(self, roomid, raffleId):
         time.sleep(65)
-        url = 'http://api.live.bilibili.com/activity/v1/SummerBattle/notice'
+        url = 'http://api.live.bilibili.com/activity/v1/Raffle/notice'
         params = {
                 'roomid':roomid,
                 'raffleId':raffleId

@@ -217,21 +217,21 @@ class AutoRewardHandler(SimpleDanmakuHandler):
                     roomid = str(raw['roomid'])
                     self.sender.joinSmallTV(roomid, raw['tv_id'])
 
-class AutoSummerRewardHandler(SimpleDanmakuHandler):
+class AutoRaffleRewardHandler(SimpleDanmakuHandler):
 
     def __init__(self, sender):
-        print 'start auto reward summer gift...'
+        print 'start auto reward raffle gift...'
         self.sender = sender
 
     def handleDanmaku(self, danmaku):
-        super(AutoSummerRewardHandler, self).handleDanmaku(danmaku)
+        super(AutoRaffleRewardHandler, self).handleDanmaku(danmaku)
         if hasattr(danmaku, 'json'):
             raw = danmaku.json
             if raw['cmd'] in ['SYS_GIFT']: 
                 if 'roomid' in raw and 'giftId' in raw:
                     roomid = str(raw['roomid'])
                     giftId = str(raw['giftId'])
-                    self.sender.joinSummer(roomid, giftId)
+                    self.sender.joinRaffle(roomid, giftId)
         
 def main():
     pass
