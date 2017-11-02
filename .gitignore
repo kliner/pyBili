@@ -1,6 +1,10 @@
 # mac:
 .DS_Store
 
+# temp file:
+img.jpg
+captcha.jpg
+
 # vim:
 *.swp
 

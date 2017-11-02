@@ -96,14 +96,15 @@ class Config(object):
             if section == 'GUI':
                 self.w, self.h = cf.get(section, 'width', DEFAULT_WIDTH), cf.get(section, 'height', DEFAULT_HEIGHT)
             elif section == 'cookies':
-                s = cf.get(section, 'cookies')
-                if 'cookie:' == s[:7]: s = s[7:] # do strip 
-                try:
-                    for line in s.split(';'):
-                        name, value = line.strip().split('=', 1)
-                        self.cookies[name] = value
-                except Exception, e:
-                    print 'warning! please set correct cookies into \'cookie.txt\'', e
+                if cf.has_option(section, 'cookies'): 
+                    s = cf.get(section, 'cookies')
+                    if 'cookie:' == s[:7]: s = s[7:] # do strip 
+                    try:
+                        for line in s.split(';'):
+                            name, value = line.strip().split('=', 1)
+                            self.cookies[name] = value
+                    except Exception, e:
+                        print 'warning! please set correct cookies into \'cookie.txt\'', e
             else:
                 try:
                     d = {}

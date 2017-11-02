@@ -92,6 +92,7 @@ def main():
     config = bili_config.Config()
     cookies = config.cookies
     sender = bili_sender.Sender(cookies)
+    sender.startFreeSilverThread()
     while 1:
         cmd = raw_input()
         sender.sendDanmaku(roomid, cmd)
