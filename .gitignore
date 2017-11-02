@@ -17,3 +17,4 @@ test*.py
 .pypirc
 MANIFEST
 *.log
+*.log.*

@@ -17,7 +17,7 @@ class Sender(object):
 
     def _initLogger(self, logger):
         logger.setLevel(logging.DEBUG)
-        ch = logging.handlers.TimedRotatingFileHandler('bili_sender.log')
+        ch = logging.handlers.TimedRotatingFileHandler('bili_sender.log', when='midnight')
         logger.addHandler(ch)
         # create formatter
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -39,26 +39,24 @@ class Sender(object):
     def _get(self, url, params):
         try:
             r = requests.get(url, params=params, cookies=self.cookies)
-            result = r.content
-            raw = json.loads(result)
-            if raw['code'] != 0: 
-                self.logger.debug(raw)
-                self.logger.warn(raw['msg'])
-            else: return raw
+            return self._parseHttpResult(r)
         except:
             pass
 
     def _post(self, url, params):
         try:
             r = requests.post(url, data=params, cookies=self.cookies)
-            result = r.content
-            raw = json.loads(result)
-            if raw['code'] != 0: 
-                self.logger.debug(raw)
-                self.logger.warn(raw['msg'])
-            else: return raw
+            return self._parseHttpResult(r)
         except:
             pass
+
+    def _parseHttpResult(self, r):
+        result = r.content
+        raw = json.loads(result)
+        if raw['code'] != 0: 
+            self.logger.debug(raw)
+            self.logger.warn(raw['msg'])
+        else: return raw
 
     def sendDanmaku(self, roomid, content, color='white'):
         content = content.strip()
@@ -116,7 +114,7 @@ class Sender(object):
         if r:
             if r['data']['gift_id'] == 76: self.logger.info('get!')
             elif r['data']['gift_id'] == -1: self.logger.info('empty!')
-            else: self.logger.warn(raw['data'])
+            else: self.logger.warn(r['data'])
 
 def main():
     import bili_config
