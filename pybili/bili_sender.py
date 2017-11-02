@@ -88,7 +88,7 @@ class Sender(object):
                 'raffleId':raffleId
                 }
         r = self._post(RAFFLE_URL, params)
-        if r: self.logger.debug('join summer: %s' % r['msg'])
+        if r: self.logger.debug('join raffle: %s' % r['msg'])
 
     def joinRaffle(self, roomid, giftId):
         params = {
@@ -104,7 +104,7 @@ class Sender(object):
                     thread.start_new_thread(self.checkRaffle, (roomid, raffleId))
 
     def checkRaffle(self, roomid, raffleId):
-        time.sleep(65)
+        time.sleep(105)
         url = 'http://api.live.bilibili.com/activity/v1/Raffle/notice'
         params = {
                 'roomid':roomid,
@@ -112,7 +112,7 @@ class Sender(object):
                 }
         r = self._get(url, params)
         if r:
-            if r['data']['gift_id'] == 76: self.logger.info('get!')
+            if r['data']['gift_id'] > 0: self.logger.info('get!name:%s, cnt:%d' % (r['data']['gift_name'], r['data']['gift_num']))
             elif r['data']['gift_id'] == -1: self.logger.info('empty!')
             else: self.logger.warn(r['data'])
 

@@ -118,8 +118,8 @@ class Config(object):
 
     def p(self):
         print 'current configs:'
-        print '----------'
-        print 'GUI width, height:', self.w, self.h
+        #print '----------'
+        #print 'GUI width, height:', self.w, self.h
         for k in self.data.keys():
             print '----------'
             print k
@@ -139,15 +139,15 @@ class Config(object):
             if not cf.has_section('cookies'): cf.add_section('cookies')
             cf.set('cookies', 'cookies', cookies)
 
-        w = raw_input('Please input the GUI width(current=%s): [press enter to skip]' % str(self._get(cf, 'GUI', 'width', value=DEFAULT_WIDTH)))
-        if w:
-            if not cf.has_section('GUI'): cf.add_section('GUI')
-            cf.set('GUI', 'width', int(w))
+        #w = raw_input('Please input the GUI width(current=%s): [press enter to skip]' % str(self._get(cf, 'GUI', 'width', value=DEFAULT_WIDTH)))
+        #if w:
+        #    if not cf.has_section('GUI'): cf.add_section('GUI')
+        #    cf.set('GUI', 'width', int(w))
 
-        h = raw_input('Please input the GUI height(current=%s): [press enter to skip]' % str(self._get(cf, 'GUI', 'height', value=DEFAULT_HEIGHT)))
-        if h:
-            if not cf.has_section('GUI'): cf.add_section('GUI')
-            cf.set('GUI', 'height', int(h))
+        #h = raw_input('Please input the GUI height(current=%s): [press enter to skip]' % str(self._get(cf, 'GUI', 'height', value=DEFAULT_HEIGHT)))
+        #if h:
+        #    if not cf.has_section('GUI'): cf.add_section('GUI')
+        #    cf.set('GUI', 'height', int(h))
         
 
         roomid = raw_input('Please input the roomid to setup: [press enter to skip]')
