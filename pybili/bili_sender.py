@@ -28,13 +28,13 @@ class Sender(object):
         
         # add formatter to ch
         ch.setFormatter(formatter)
-        self.logger = logger
-        self.logger.info('logger bili_sender init success')
+        logger.info('logger bili_sender init success')
 
     def __init__(self, cookies):
         logger = logging.getLogger('bili_sender')
         if not logger.handlers:
             self._initLogger(logger)
+        self.logger = logger
         
         self.cookies = cookies
         self.lightenIds = set()
@@ -164,6 +164,7 @@ class Sender(object):
 
     def startFreeSilverThread(self):
         if self.cookies:
+            print 'checking free silver coins...'
             thread.start_new_thread(self.checkFreeSilver, ())
 
 def main():
