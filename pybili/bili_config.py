@@ -1,6 +1,8 @@
 #!/usr/bin/python
 #coding=utf-8
-import os.path 
+from shutil import copyfile
+import pybili
+import os
 import sys
 import ConfigParser
 
@@ -64,10 +66,16 @@ class Config(object):
     data = {}
     cookies = {}
 
-    def __init__(self, path = os.path.expanduser("~") + '/.pybili.conf'):
+    def __init__(self, path = os.path.join(pybili.__workdir__, 'config')):
         if not os.path.isfile(path):
-            print path
-            print 'warning! please set the config file!'
+            old_path = os.path.join(os.path.expanduser("~"), '.pybili.conf')
+            if os.path.isfile(old_path):
+                print 'updating config...'
+                copyfile(old_path, path)
+                print 'config updated! new path: %s' % path 
+            else:
+                print path
+                print 'warning! please set the config file!'
             return 
         self.path = path
         self.read(path)
@@ -170,3 +178,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

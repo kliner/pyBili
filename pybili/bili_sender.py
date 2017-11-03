@@ -7,7 +7,8 @@ import sys
 import thread
 import logging
 import logging.handlers
-import ocr
+import os.path
+import pybili
 
 SEND_URL = 'http://live.bilibili.com/msg/send'
 TV_URL = 'http://api.live.bilibili.com/SmallTV/join'
@@ -20,8 +21,8 @@ CAPTCHA_URL = 'http://api.live.bilibili.com/freeSilver/getCaptcha?ts=%i'
 class Sender(object):
 
     def _initLogger(self, logger):
-        logger.setLevel(logging.DEBUG)
-        ch = logging.handlers.TimedRotatingFileHandler('bili_sender.log', when='midnight')
+        logger.setLevel(pybili.__loglevel__)
+        ch = logging.handlers.TimedRotatingFileHandler(os.path.join(pybili.__workdir__, 'bili_sender.log'), when='midnight')
         logger.addHandler(ch)
         # create formatter
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -163,6 +164,8 @@ class Sender(object):
             return int(r['data']['time_end'] - cur)
 
     def startFreeSilverThread(self):
+        print 'init ocr function...'
+        import ocr
         if self.cookies:
             print 'checking free silver coins...'
             thread.start_new_thread(self.checkFreeSilver, ())

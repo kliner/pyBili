@@ -4,6 +4,8 @@ import numpy as np
 import os.path
 from PIL import Image
 import training
+import pybili
+import urllib
 
 DEBUG = 0
 
@@ -16,20 +18,23 @@ def recognize(path):
     pix /= 128
     pix = 1 - pix
 
-    if DEBUG: consolePrint(pix)
+    if DEBUG: 
+        consolePrint(pix)
+        training.train()
     
     # load trained data
     global trained_data
-    p = 'trained_data.json'
-    if os.path.exists(p): 
-        with open(p, 'r') as f:
-            trained_data = json.load(f)
-    else: trained_data = training.train()
+    p = os.path.join(pybili.__workdir__, 'trained_data.json')
+    if not os.path.exists(p): 
+        print 'download ocr data...'
+        urllib.urlretrieve("https://raw.githubusercontent.com/kliner/pyBili/dev/pybili/trained_data.json", p)
+        print 'success'
+    with open(p, 'r') as f:
+        trained_data = json.load(f)
     
     # do recognize
     s = ''
     for area in _selectImageArea(pix): s += _recognize(pix, area)
-    if DEBUG: print s
     return eval(s)
 
 def consolePrint(pix):
@@ -54,14 +59,12 @@ def _selectImageArea(pix):
         image_area += [image_lines[i], image_lines[j-1]]
         i = j
     image_area = zip(image_area[::2], image_area[1::2])
-    #print image_area
     return image_area
 
 def _match(pix):
     global trained_data
     arr = pix.ravel()
     key = ''.join(map(str, arr.tolist()))
-    #print key
     for k, v in trained_data:
         sim = sum([1 for i in xrange(len(v)) if v[i] == key[i]])
         if sim > 620: return k
@@ -85,5 +88,4 @@ def _recognize_17(pix, area):
 
 if __name__ == '__main__':
     f = sys.argv[1]
-    #f = 'img.jpg'
     print recognize(f)
