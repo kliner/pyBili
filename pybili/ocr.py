@@ -27,7 +27,7 @@ def recognize(path):
     p = os.path.join(pybili.__workdir__, 'trained_data.json')
     if not os.path.exists(p): 
         print 'download ocr data...'
-        urllib.urlretrieve("https://raw.githubusercontent.com/kliner/pyBili/dev/pybili/trained_data.json", p)
+        urllib.urlretrieve("https://raw.githubusercontent.com/kliner/pyBili/master/pybili/trained_data.json", p)
         print 'success'
     with open(p, 'r') as f:
         trained_data = json.load(f)
