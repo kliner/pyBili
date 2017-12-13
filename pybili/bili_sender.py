@@ -9,7 +9,6 @@ import logging
 import logging.handlers
 import os.path
 import pybili
-import ocr
 import traceback
 
 SEND_URL = 'http://live.bilibili.com/msg/send'
@@ -175,10 +174,13 @@ class Sender(object):
 
     def startFreeSilverThread(self):
         print 'init ocr function...'
-        import ocr
-        if self.cookies:
-            print 'checking free silver coins...'
-            thread.start_new_thread(self.checkFreeSilver, ())
+        try:
+            import ocr
+            if self.cookies:
+                print 'checking free silver coins...'
+                thread.start_new_thread(self.checkFreeSilver, ())
+        except:
+            self.logger.error('cannot start checkFreeSilver thread')
 
 def main():
     import bili_config

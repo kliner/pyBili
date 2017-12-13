@@ -19,7 +19,7 @@ setup(
       'db':['pymongo'], 
       'mq':['pika'], 
       'ocr':['Pillow'],
-  }
+  },
 
   entry_points={
     'console_scripts':[
