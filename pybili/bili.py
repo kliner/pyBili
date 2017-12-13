@@ -17,7 +17,7 @@ sys.setdefaultencoding('utf-8')
 HOST = 'livecmt-2.bilibili.com'
 PORT = 788
 BUFFER_SIZE = 128 * 1024
-logging.basicConfig(filename=os.path.join(pybili.__workdir__, 'bili.log'), level=pybili.__loglevel__)
+logging.basicConfig(filename=os.path.join(pybili.__workdir__, 'bili.log'), level=pybili.__loglevel__, format='%(asctime)s %(levelname)s:%(message)s')
 
 DEBUG = 0
 

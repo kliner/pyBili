@@ -2,7 +2,7 @@ import os
 import logging
 
 __author__ = 'kliner'
-__version__ = '0.3.1'
+__version__ = '0.3.2'
 
 # init config & temp dir
 home = os.path.expanduser("~")
