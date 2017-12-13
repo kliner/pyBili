@@ -115,11 +115,14 @@ class DanmakuHandler(bili.SimpleDanmakuHandler):
         with open('%s/.pybili.ti' % self.home_path, 'w') as f:
             f.write('\n'.join(origin_music))
         
-        subprocess.Popen('opencc -i %s/.pybili.ti -o %s/.pybili.to -c t2s.json' % (self.home_path, self.home_path), shell=True)
+        try:
+            subprocess.Popen('opencc -i %s/.pybili.ti -o %s/.pybili.to -c t2s.json' % (self.home_path, self.home_path), shell=True)
 
-        with open('%s/.pybili.to' % self.home_path, 'r') as f:
-            lst = f.read().split('\n')
-            self.all_music = [Music(n,s,n) for n, s in zip(origin_music, lst)]
+            with open('%s/.pybili.to' % self.home_path, 'r') as f:
+                lst = f.read().split('\n')
+                self.all_music = [Music(n,s,n) for n, s in zip(origin_music, lst)]
+        except:
+            print 'init cc error'
            
         if DEBUG: print self.all_music
         if DEBUG: print self.all_music[0], len(self.all_music)
