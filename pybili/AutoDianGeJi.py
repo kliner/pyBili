@@ -123,6 +123,7 @@ class DanmakuHandler(bili.SimpleDanmakuHandler):
                 self.all_music = [Music(n,s,n) for n, s in zip(origin_music, lst)]
         except:
             print 'init cc error'
+            self.all_music = [Music(n,n,n) for n in origin_music]
            
         if DEBUG: print self.all_music
         if DEBUG: print self.all_music[0], len(self.all_music)
