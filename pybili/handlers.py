@@ -7,11 +7,8 @@ import threading
 import subprocess
 import re
 
-import pika
-
 from bili import DanmakuHandler
 from bili import SimpleDanmakuHandler
-from pymongo import MongoClient
 
 DEBUG = 0
 
@@ -20,6 +17,7 @@ class RabbitMQHandler(SimpleDanmakuHandler):
     def __init__(self):
         try:
             print 'start RabbitMQ publisher...'
+            import pika
             connection = pika.BlockingConnection()
             self.client = connection.channel()
         except:
@@ -52,6 +50,7 @@ class MongoHandler(DanmakuHandler):
     def __init__(self):
         try:
             print 'start db logger...'
+            from pymongo import MongoClient
             self.client = MongoClient()
             self.db = self.client.danmaku
         except:

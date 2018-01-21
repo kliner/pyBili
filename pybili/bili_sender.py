@@ -9,7 +9,6 @@ import logging
 import logging.handlers
 import os.path
 import pybili
-import ocr
 import traceback
 
 SEND_URL = 'http://live.bilibili.com/msg/send'
@@ -21,6 +20,10 @@ GET_FREE_SILVER = 'http://api.live.bilibili.com/FreeSilver/getAward'
 CAPTCHA_URL = 'http://api.live.bilibili.com/freeSilver/getCaptcha?ts=%i'
 
 class Sender(object):
+
+    headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36',
+            'Host': 'api.live.bilibili.com',
+            }
 
     def _initLogger(self, logger):
         logger.setLevel(pybili.__loglevel__)
@@ -45,14 +48,14 @@ class Sender(object):
 
     def _get(self, url, params = None):
         try:
-            r = requests.get(url, params=params, cookies=self.cookies)
+            r = requests.get(url, params=params, cookies=self.cookies, headers = self.headers)
             return self._parseHttpResult(url, r)
         except:
             self.logger.error("HTTP GET REQ %s fail!" % url)
 
     def _post(self, url, params = None):
         try:
-            r = requests.post(url, data=params, cookies=self.cookies)
+            r = requests.post(url, data=params, cookies=self.cookies, headers = self.headers)
             return self._parseHttpResult(url, r)
         except:
             self.logger.error("HTTP POST REQ %s fail!" % url)
@@ -61,7 +64,9 @@ class Sender(object):
         result = r.content
         raw = json.loads(result)
         self.logger.debug(raw)
-        if raw['code'] != 0: 
+        if raw['code'] == 65531:
+            self.logger.warn("API %s fail! WRONG HEADER!" % (url))
+        elif raw['code'] != 0: 
             self.logger.warn("API %s fail! MSG: %s" % (url, raw['msg']))
         return raw
 
@@ -90,6 +95,9 @@ class Sender(object):
         self._get(TV_URL, params)
 
     def _joinRaffle(self, roomid, raffleId):
+        room_data = self._get('http://api.live.bilibili.com/room/v1/Room/room_init?id=%s' % roomid)['data']
+        self.headers['Referer'] = 'http://live.bilibili.com/%s' % (room_data['short_id'] if room_data['short_id'] != 0 else room_data['room_id'])
+
         params = {
                 'roomid':roomid,
                 'raffleId':raffleId
@@ -111,7 +119,7 @@ class Sender(object):
                     thread.start_new_thread(self.checkRaffle, (roomid, raffleId))
 
     def checkRaffle(self, roomid, raffleId):
-        time.sleep(105)
+        time.sleep(125)
         url = 'http://api.live.bilibili.com/activity/v1/Raffle/notice'
         params = {
                 'roomid':roomid,
@@ -175,10 +183,14 @@ class Sender(object):
 
     def startFreeSilverThread(self):
         print 'init ocr function...'
-        import ocr
-        if self.cookies:
-            print 'checking free silver coins...'
-            thread.start_new_thread(self.checkFreeSilver, ())
+        try:
+            global ocr
+            import ocr
+            if self.cookies:
+                print 'checking free silver coins...'
+                thread.start_new_thread(self.checkFreeSilver, ())
+        except:
+            self.logger.error('cannot start checkFreeSilver thread')
 
 def main():
     import bili_config
