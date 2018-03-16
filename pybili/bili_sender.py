@@ -16,8 +16,8 @@ TV_URL = 'http://api.live.bilibili.com/gift/v2/smalltv/join'
 QUERY_RAFFLE_URL = 'http://api.live.bilibili.com/activity/v1/Raffle/check'
 RAFFLE_URL = 'http://api.live.bilibili.com/activity/v1/Raffle/join'
 QUERY_FREE_SILVER = 'http://api.live.bilibili.com/lottery/v1/SilverBox/getCurrentTask'
-GET_FREE_SILVER = 'http://api.live.bilibili.com/FreeSilver/getAward'
-CAPTCHA_URL = 'http://api.live.bilibili.com/freeSilver/getCaptcha?ts=%i'
+GET_FREE_SILVER = 'http://api.live.bilibili.com/lottery/v1/SilverBox/getAward'
+CAPTCHA_URL = 'http://api.live.bilibili.com/lottery/v1/SilverBox/getCaptcha?ts=%i'
 SIGN_IN_URL = ''
 GET_SIGN_INFO_URL = 'http://api.live.bilibili.com/sign/GetSignInfo'
 GET_USER_INFO_URL = 'http://live.bilibili.com/user/getuserinfo'
@@ -162,8 +162,11 @@ class Sender(object):
     def downloadCaptcha(self, path):
         t = int(time.time()*1000)
         r = requests.get(CAPTCHA_URL % t, cookies=self.cookies)
+        raw = json.loads(r.content)
         with open(path, 'w') as f:
-            for chunk in r: f.write(chunk)
+            s = raw['data']['img']
+            s = s.split(',')[1]
+            f.write(s.decode('base64'))
         return 'ok'
 
     def getFreeSilver(self, data):
