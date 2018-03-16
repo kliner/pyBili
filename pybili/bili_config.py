@@ -139,6 +139,13 @@ class Config(object):
         a = raw_input(msg)
         return a in 'Yy1'
 
+    def setCookies(self, s):
+        cf = ConfigParser.RawConfigParser()
+        cf.read(self.path)
+        if not cf.has_section('cookies'): cf.add_section('cookies')
+        cf.set('cookies', 'cookies', s)
+        cf.write(open(self.path, 'w'))
+
     def setup(self):
         cf = ConfigParser.RawConfigParser()
         cf.read(self.path)
