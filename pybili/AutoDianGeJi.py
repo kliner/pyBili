@@ -14,14 +14,20 @@ import random
 import threading
 import subprocess
 import traceback
+import logging
+import logging.handlers
 
 reload(sys)  
 sys.setdefaultencoding('utf8')
 
-DEBUG = 0
-DIVIDER = '--------------------'
+DIVIDER = '-' * 15
+
+HOME_PATH = os.path.expanduser("~")
+LIB_PATH = HOME_PATH + '/Music/lib/'
+
 
 class Music(object):
+
 
     def __init__(self, n, s, e): 
         self.name, self.sname, self.ename = n, s, e
@@ -34,6 +40,117 @@ class Music(object):
     
     def searchKey(self): 
         return '%s %s %s' % (self.name, self.sname, self.ename)
+
+    def getPath(self):
+        return LIB_PATH + self.name
+
+
+class MusicPlayer(object):
+    
+    
+    def __init__(self):
+        self.p = mplayer.Player()
+        self.p.volume = 20
+        skip = False
+
+    def play(self, music):
+        self.p.stop()
+        self.p.loadfile(music.getPath())
+        time.sleep(0.5) # wait mplayer to load the file
+        print self.p.length # dont know WTF, without will return None
+        length = self.p.length
+        self.p.pause()
+        return length
+
+    def stop(self):
+        self.p.stop()
+
+    def pause(self):
+        self.p.pause()
+
+
+class MusicManager(object):
+
+
+    def __init__(self, path):
+        self.all_musics = []
+        self.to_play_musics = []
+        self.p = MusicPlayer()
+        self.LOCK = threading.Lock()
+        self.skip = False
+        self.lib_path = path
+        self.current_music = None
+        self._load_lib()
+
+
+    def _music_thread(self):
+        while 1:
+            if self.to_play_musics:
+                self.LOCK.acquire()
+                u, music = self.to_play_musics.pop(0)
+                self.LOCK.release()
+                self._play_music(music)
+            else:
+                music = random.choice(self.all_musics)
+                self._play_music(music)
+
+    def _play_music(self, music):
+        self.current_music = music
+        length = self.p.play(music)
+        for i in xrange(int(length)):
+            if self.skip:
+                self.skip = False
+                self.p.stop()
+                break
+            time.sleep(1)
+
+    def _load_lib(self):
+        origin_music = [f[:-4] for f in os.listdir(self.lib_path) if f[-4:] == '.mp3'] # load mp3 files in the lib_path
+        with open('%s/.pybili.ti' % self.lib_path, 'w') as f:
+            f.write('\n'.join(origin_music))
+        
+        try:
+            # tranlate to Traditional Chinese
+            subprocess.Popen('opencc -i %s/.pybili.ti -o %s/.pybili.to -c t2s.json' % (self.lib_path, self.lib_path), shell=True)
+
+            with open('%s/.pybili.to' % self.lib_path, 'r') as f:
+                lst = f.read().split('\n')
+                self.all_musics = [Music(n,s,n) for n, s in zip(origin_music, lst)]
+        except:
+            print('init cc error')
+            self.all_musics = [Music(n,n,n) for n in origin_music]
+
+    def start_playing(self):
+        thread.start_new_thread(self._music_thread, ())
+
+    def add_to_play_list(self, new_music):
+        self.LOCK.acquire()
+        if len(self.to_play_musics) < 10:
+            if not any([music.name == new_music.name for _, music in self.to_play_musics]):
+                # not exist in the list, add it
+                self.to_play_musics += [(self.cur_user, new_music)]
+        self.LOCK.release()
+
+    def search_music(self, name):
+        result = []
+        for i, m in enumerate(self.all_music):
+            if self.match(key, m): result += [(i+1, m)]
+
+        if len(result) == 1: self.addToPlayList(result[0])
+        return result
+
+    def _match(self, key, music):
+        music_search_key = music.searchKey()
+        if key in music_search_key.lower(): return True
+        keys = key.split(' ')
+        if len(keys) > 1: 
+            if all(k in music_search_key.lower() for k in keys): return True
+
+    def skip(self):
+        self.skip = True
+
+    def get_current_playing(self):
+        return self.current_music
 
 class DBHelper(object):
 
