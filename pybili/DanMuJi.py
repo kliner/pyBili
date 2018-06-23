@@ -70,9 +70,10 @@ def initHandlers(roomid):
 
     handler = DanmakuHandler(roomid, config = config)
     sender = bili_sender.Sender(cookies)
-    sender.startFreeSilverThread()
+    #sender.startFreeSilverThread()
 
     danmakuHandlers = [handler]
+    if config.get(roomid, "HttpMsg", False): danmakuHandlers += [HttpMsgHandler()]
     if config.get(roomid, "RabbitMQApi", False): danmakuHandlers += [RabbitMQHandler()]
     if config.get(roomid, "RecordDanmaku", False): danmakuHandlers += [MongoHandler()]
     if config.get(roomid, "MacTTS", False): danmakuHandlers += [TTSHandler()]
