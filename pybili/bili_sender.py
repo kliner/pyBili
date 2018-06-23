@@ -15,9 +15,12 @@ SEND_URL = 'http://live.bilibili.com/msg/send'
 TV_URL = 'http://api.live.bilibili.com/gift/v2/smalltv/join'
 QUERY_RAFFLE_URL = 'http://api.live.bilibili.com/activity/v1/Raffle/check'
 RAFFLE_URL = 'http://api.live.bilibili.com/activity/v1/Raffle/join'
-QUERY_FREE_SILVER = 'http://api.live.bilibili.com/FreeSilver/getCurrentTask'
-GET_FREE_SILVER = 'http://api.live.bilibili.com/FreeSilver/getAward'
-CAPTCHA_URL = 'http://api.live.bilibili.com/freeSilver/getCaptcha?ts=%i'
+QUERY_FREE_SILVER = 'http://api.live.bilibili.com/lottery/v1/SilverBox/getCurrentTask'
+GET_FREE_SILVER = 'http://api.live.bilibili.com/lottery/v1/SilverBox/getAward'
+CAPTCHA_URL = 'http://api.live.bilibili.com/lottery/v1/SilverBox/getCaptcha?ts=%i'
+SIGN_IN_URL = ''
+GET_SIGN_INFO_URL = 'http://api.live.bilibili.com/sign/GetSignInfo'
+GET_USER_INFO_URL = 'http://live.bilibili.com/user/getuserinfo'
 
 class Sender(object):
 
@@ -66,9 +69,20 @@ class Sender(object):
         self.logger.debug(raw)
         if raw['code'] == 65531:
             self.logger.warn("API %s fail! WRONG HEADER!" % (url))
-        elif raw['code'] != 0: 
+        elif raw['code'] != 0 and raw['code'] != 'REPONSE_OK': 
             self.logger.warn("API %s fail! MSG: %s" % (url, raw['msg']))
         return raw
+
+    def isCookieValid(self):
+        raw = self._get(GET_USER_INFO_URL)
+        if raw['code'] != 0 and raw['code'] != 'REPONSE_OK': 
+            return raw['msg']
+        else:
+            uname = raw['data']['uname']
+            return 'OK, welcome %s' % uname
+
+    def signIn(self):
+        return self._get(SIGN_IN_URL)
 
     def sendDanmaku(self, roomid, content, color='white'):
         content = content.strip()
@@ -148,8 +162,11 @@ class Sender(object):
     def downloadCaptcha(self, path):
         t = int(time.time()*1000)
         r = requests.get(CAPTCHA_URL % t, cookies=self.cookies)
+        raw = json.loads(r.content)
         with open(path, 'w') as f:
-            for chunk in r: f.write(chunk)
+            s = raw['data']['img']
+            s = s.split(',')[1]
+            f.write(s.decode('base64'))
         return 'ok'
 
     def getFreeSilver(self, data):
