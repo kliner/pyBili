@@ -13,6 +13,11 @@ class Config(object):
 
     options = [
             {
+                'k':'HttpMsg',
+                'v':False,
+                'desc':'send danmaku to localhost:4242'
+            },
+            {
                 'k':'RabbitMQApi',
                 'v':False,
                 'desc':'send danmaku to RabbitMQ(routing_key=bilimq)'

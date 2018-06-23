@@ -6,11 +6,31 @@ import thread
 import threading
 import subprocess
 import re
+import requests
 
 from bili import DanmakuHandler
 from bili import SimpleDanmakuHandler
 
 DEBUG = 0
+
+class HttpMsgHandler(SimpleDanmakuHandler):
+
+    def __init__(self):
+        print 'start HTTP msg handler...'
+
+    def handleDanmaku(self, danmaku):
+        super(HttpMsgHandler, self).handleDanmaku(danmaku)
+
+        if hasattr(danmaku, 'user') and hasattr(danmaku, 'text'): 
+            params = {
+                'user':danmaku.user,
+                'text':danmaku.text,
+                's':'bili'
+            }
+            try:
+                requests.post(url='http://localhost:4242/msg', data=params);
+            except:
+                pass
 
 class RabbitMQHandler(SimpleDanmakuHandler):
 
